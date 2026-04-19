@@ -1048,6 +1048,109 @@ window.switchTab = function(tabName) {
     }
 };
 
+// Populate test data for ERP
+window.populateTestData = async function() {
+    try {
+        const { db } = await getFirebase();
+        const user = firebase.auth().currentUser;
+        
+        if (!user) {
+            alert('Пожалуйста, войдите в систему сначала');
+            return;
+        }
+        
+        const uid = user.uid;
+        console.log('Populating test data for user:', uid);
+        
+        // Test Equipment (Printers)
+        const equipmentRef = db.ref(`users/${uid}/equipment`);
+        await equipmentRef.set({
+            printer1: {
+                name: 'Prusa i3 MK3S',
+                type: 'FDM',
+                wattage: 200,
+                cost: 25000,
+                depreciationYears: 5,
+                filamentTypes: ['PLA', 'PETG', 'ABS']
+            },
+            printer2: {
+                name: 'Ender 3 V2',
+                type: 'FDM',
+                wattage: 250,
+                cost: 18000,
+                depreciationYears: 3,
+                filamentTypes: ['PLA', 'PETG']
+            },
+            printer3: {
+                name: 'Anycubic Photon',
+                type: 'SLA',
+                wattage: 30,
+                cost: 15000,
+                depreciationYears: 4,
+                filamentTypes: ['Resin Standard']
+            }
+        });
+        console.log('✓ Equipment added');
+        
+        // Test Projects (Orders)
+        const projectsRef = db.ref(`users/${uid}/projects`);
+        await projectsRef.set({
+            order1: {
+                name: 'Заказ #001 - Деталь для робота',
+                status: 'pending',
+                filamentType: 'PLA',
+                filamentCost: 1500,
+                printWeight: 250,
+                removalTime: 10
+            },
+            order2: {
+                name: 'Заказ #002 - Декоративная ваза',
+                status: 'pending',
+                filamentType: 'PETG',
+                filamentCost: 1800,
+                printWeight: 180,
+                removalTime: 5
+            },
+            order3: {
+                name: 'Заказ #003 - Прототип корпуса',
+                status: 'pending',
+                filamentType: 'ABS',
+                filamentCost: 2000,
+                printWeight: 320,
+                removalTime: 15
+            },
+            order4: {
+                name: 'Заказ #004 - Миниатюры',
+                status: 'pending',
+                filamentType: 'Resin Standard',
+                resinCost: 2500,
+                printVolume: 50,
+                removalTime: 20
+            },
+            order5: {
+                name: 'Заказ #005 - Инженерная деталь',
+                status: 'pending',
+                filamentType: 'PLA',
+                filamentCost: 1500,
+                printWeight: 150,
+                removalTime: 8
+            }
+        });
+        console.log('✓ Projects added');
+        
+        alert('✓ Тестовые данные добавлены успешно! Обновите страницу.');
+        
+        // Reload ERP data
+        if (typeof loadERPData === 'function') {
+            loadERPData();
+        }
+        
+    } catch (error) {
+        console.error('Error populating test data:', error);
+        alert('Ошибка при добавлении данных: ' + error.message);
+    }
+};
+
 function resetForm() {
     // Reset form to default values
     const filamentType = document.getElementById('filamentType');
