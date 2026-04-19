@@ -7,6 +7,114 @@ const filamentDefaults = {
     custom: { cost: 2000, wattage: 300 }
 };
 
+// JSONBin.io sync functions
+async function saveToCloud() {
+    const apiKey = localStorage.getItem('jsonbinApiKey') || '';
+    const binId = localStorage.getItem('jsonbinBinId') || '';
+    
+    if (!apiKey || !binId) {
+        alert('Сначала настройте JSONBin.io:\n1. Зарегистрируйтесь на jsonbin.io\n2. Создайте новый bin\n3. Введите API Key и Bin ID в настройках');
+        return;
+    }
+
+    const settings = {};
+    const inputs = document.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        if (input.type === 'checkbox') {
+            settings[input.id] = input.checked;
+        } else if (input.type !== 'button') {
+            settings[input.id] = input.value;
+        }
+    });
+
+    try {
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': apiKey,
+            },
+            body: JSON.stringify(settings),
+        });
+
+        if (response.ok) {
+            alert('Настройки сохранены в облаке!');
+        } else {
+            alert('Ошибка сохранения: ' + response.statusText);
+        }
+    } catch (error) {
+        alert('Ошибка сети: ' + error.message);
+    }
+}
+
+async function loadFromCloud() {
+    const apiKey = localStorage.getItem('jsonbinApiKey') || '';
+    const binId = localStorage.getItem('jsonbinBinId') || '';
+    
+    if (!apiKey || !binId) {
+        alert('Сначала настройте JSONBin.io:\n1. Зарегистрируйтесь на jsonbin.io\n2. Создайте новый bin\n3. Введите API Key и Bin ID в настройках');
+        return;
+    }
+
+    try {
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+            headers: {
+                'X-Master-Key': apiKey,
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const settings = data.record;
+            
+            Object.entries(settings).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (element.type === 'checkbox') {
+                        element.checked = value;
+                    } else {
+                        element.value = value;
+                    }
+                }
+            });
+            
+            // Trigger UI updates
+            togglePrintType();
+            
+            const paintingEnabled = document.getElementById('paintingEnabled');
+            if (paintingEnabled && paintingEnabled.checked) {
+                togglePainting();
+            }
+            
+            calculateCost();
+            alert('Настройки загружены из облака!');
+        } else {
+            alert('Ошибка загрузки: ' + response.statusText);
+        }
+    } catch (error) {
+        alert('Ошибка сети: ' + error.message);
+    }
+}
+
+function showCloudConfig() {
+    const apiKey = localStorage.getItem('jsonbinApiKey') || '';
+    const binId = localStorage.getItem('jsonbinBinId') || '';
+    
+    const newApiKey = prompt('Введите API Key из JSONBin.io:', apiKey);
+    const newBinId = prompt('Введите Bin ID из JSONBin.io:', binId);
+    
+    if (newApiKey !== null) {
+        localStorage.setItem('jsonbinApiKey', newApiKey);
+    }
+    if (newBinId !== null) {
+        localStorage.setItem('jsonbinBinId', newBinId);
+    }
+    
+    if (newApiKey || newBinId) {
+        alert('Конфигурация JSONBin.io сохранена!');
+    }
+}
+
 // Dremel wear level costs
 const dremelWearCosts = {
     light: 50,
