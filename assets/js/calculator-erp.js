@@ -16,9 +16,13 @@ async function initFirebase() {
     auth.onAuthStateChanged((user) => {
         currentUser = user;
         updateAuthUI();
-        
+
         if (user) {
             loadSettingsFromFirebase(user.uid);
+            // Load global settings (tariffs and post-processing)
+            if (typeof loadGlobalSettings === 'function') {
+                loadGlobalSettings();
+            }
         }
     });
 }

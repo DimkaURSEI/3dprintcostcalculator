@@ -57,8 +57,8 @@ function initPremiumUI() {
     initCalculator();
   }
 
-  // Load global settings from Firebase
-  loadGlobalSettings();
+  // Load global settings from Firebase (called after auth state changes in calculator-erp.js)
+  // Note: loadGlobalSettings() is called in auth.onAuthStateChanged callback in calculator-erp.js
 
   // Add auto-save for tariffs and post-processing
   const tariffInputs = document.querySelectorAll('#monthlyRent, #monthlyHours, #electricityCost, #laborHourlyRate');
@@ -269,25 +269,48 @@ async function saveGlobalSettings() {
       monthlyRent: parseFloat(document.getElementById('monthlyRent').value) || 15000,
       monthlyHours: parseFloat(document.getElementById('monthlyHours').value) || 160,
       electricityCost: parseFloat(document.getElementById('electricityCost').value) || 5.47,
-      laborRate: parseFloat(document.getElementById('laborHourlyRate').value) || 500,
-      paintingLaborRate: parseFloat(document.getElementById('paintingLaborRate')?.value) || 600
+      laborRate: parseFloat(document.getElementById('laborHourlyRate').value) || 500
     };
+
+    // paintingLaborRate will be added in Task 7
+    const paintingLaborRateEl = document.getElementById('paintingLaborRate');
+    if (paintingLaborRateEl) {
+      tariffs.paintingLaborRate = parseFloat(paintingLaborRateEl.value) || 600;
+    }
+
     await db.ref(`users/${currentUser.uid}/tariffs`).set(tariffs);
 
-    // Save post-processing
-    const postProcessing = {
-      sharpening: {
-        light: parseFloat(document.getElementById('sharpeningLight').value) || 50,
-        medium: parseFloat(document.getElementById('sharpeningMedium').value) || 150,
-        heavy: parseFloat(document.getElementById('sharpeningHeavy').value) || 300
-      },
-      abrasives: {
-        light: parseFloat(document.getElementById('abrasivesLight').value) || 30,
-        medium: parseFloat(document.getElementById('abrasivesMedium').value) || 80,
-        heavy: parseFloat(document.getElementById('abrasivesHeavy').value) || 150
-      }
-    };
-    await db.ref(`users/${currentUser.uid}/postProcessing`).set(postProcessing);
+    // Save post-processing (table will be added in Task 6)
+    const postProcessing = {};
+
+    const sharpeningLightEl = document.getElementById('sharpeningLight');
+    const sharpeningMediumEl = document.getElementById('sharpeningMedium');
+    const sharpeningHeavyEl = document.getElementById('sharpeningHeavy');
+
+    if (sharpeningLightEl && sharpeningMediumEl && sharpeningHeavyEl) {
+      postProcessing.sharpening = {
+        light: parseFloat(sharpeningLightEl.value) || 50,
+        medium: parseFloat(sharpeningMediumEl.value) || 150,
+        heavy: parseFloat(sharpeningHeavyEl.value) || 300
+      };
+    }
+
+    const abrasivesLightEl = document.getElementById('abrasivesLight');
+    const abrasivesMediumEl = document.getElementById('abrasivesMedium');
+    const abrasivesHeavyEl = document.getElementById('abrasivesHeavy');
+
+    if (abrasivesLightEl && abrasivesMediumEl && abrasivesHeavyEl) {
+      postProcessing.abrasives = {
+        light: parseFloat(abrasivesLightEl.value) || 30,
+        medium: parseFloat(abrasivesMediumEl.value) || 80,
+        heavy: parseFloat(abrasivesHeavyEl.value) || 150
+      };
+    }
+
+    // Only save postProcessing if we have data
+    if (Object.keys(postProcessing).length > 0) {
+      await db.ref(`users/${currentUser.uid}/postProcessing`).set(postProcessing);
+    }
 
     console.log('[Premium] Global settings saved');
 
