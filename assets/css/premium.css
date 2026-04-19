@@ -200,6 +200,36 @@ body {
   background: var(--bg-tertiary);
 }
 
+@media (min-width: 769px) {
+  .bottom-nav {
+    height: 70px;
+    margin: 0 24px 24px 24px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    width: max-content;
+    min-width: 400px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 24px;
+    justify-content: center;
+    gap: 32px;
+  }
+
+  .bottom-nav .nav-item {
+    flex: 0 0 auto;
+    padding: 12px 24px;
+  }
+
+  .bottom-nav .nav-item i {
+    font-size: 28px;
+  }
+
+  .bottom-nav .nav-item span {
+    font-size: 14px;
+  }
+}
+
 /* Header */
 .app-header {
   background: var(--bg-secondary);
