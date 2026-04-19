@@ -510,8 +510,19 @@
     </header>
     <div class="erp-layout">
       <aside class="orders-sidebar">
-        <h3>📋 Очередь заказов</h3>
+        <div class="sidebar-header">
+          <h3>📋 Заказы</h3>
+          <button onclick="showCreateOrderModal()" class="add-order-btn">+ Новый заказ</button>
+        </div>
         <div id="ordersList"></div>
+      </aside>
+
+      <aside class="parts-sidebar">
+        <div class="sidebar-header">
+          <h3>📐 Детали</h3>
+          <button onclick="clearOrderFilter()" class="clear-filter-btn" style="display: none;">✕ Сбросить фильтр</button>
+        </div>
+        <div id="partsList"></div>
       </aside>
 
       <aside class="stations-sidebar">
@@ -524,6 +535,25 @@
         <h3>🎨 Покраска</h3>
         <div id="paintingList" class="stations-list"></div>
       </aside>
+    </div>
+
+    <!-- Order Creation Modal -->
+    <div id="orderModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h2>📦 Новый заказ</h2>
+        <div class="input-group">
+          <label for="modalOrderName">Название заказа:</label>
+          <input type="text" id="modalOrderName" placeholder="Заказ клиента Иванов">
+        </div>
+        <div class="input-group">
+          <label for="modalClientName">Клиент (опционально):</label>
+          <input type="text" id="modalClientName" placeholder="Имя клиента">
+        </div>
+        <div class="button-group">
+          <button onclick="createOrder()" class="primary-btn">Создать</button>
+          <button onclick="hideCreateOrderModal()" class="secondary-btn">Отмена</button>
+        </div>
+      </div>
     </div>
   </div>
 

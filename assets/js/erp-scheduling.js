@@ -3,14 +3,19 @@ async function loadERPData() {
   
   const { db } = await getFirebase();
   
-  // Load orders and parts
+  // Load orders
   const ordersSnapshot = await db.ref(`users/${currentUser.uid}/orders`).once('value');
   const orders = ordersSnapshot.val();
+  renderOrdersSidebar(orders);
+  
+  // Load orders and parts
+  const ordersSnapshot2 = await db.ref(`users/${currentUser.uid}/orders`).once('value');
+  const orders2 = ordersSnapshot2.val();
   
   // Collect all parts from all orders
   let allParts = [];
-  if (orders) {
-    for (const [orderId, order] of Object.entries(orders)) {
+  if (orders2) {
+    for (const [orderId, order] of Object.entries(orders2)) {
       const partsSnapshot = await db.ref(`users/${currentUser.uid}/orders/${orderId}/parts`).once('value');
       const parts = partsSnapshot.val();
       if (parts) {
@@ -39,8 +44,90 @@ async function loadERPData() {
   renderPaintingStations();
 }
 
-function renderPartsList(parts) {
+function renderOrdersSidebar(orders) {
   const container = document.getElementById('ordersList');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (!orders || Object.keys(orders).length === 0) {
+    container.innerHTML = '<p style="color: #666;">Нет заказов</p>';
+    return;
+  }
+  
+  Object.entries(orders).forEach(([orderId, order]) => {
+    const div = document.createElement('div');
+    div.className = 'order-sidebar-item';
+    div.dataset.orderId = orderId;
+    div.innerHTML = `
+      <strong>${order.name}</strong>
+      ${order.clientName ? `<small>${order.clientName}</small>` : ''}
+      <small>₽${order.totalCost || 0}</small>
+    `;
+    div.addEventListener('click', () => filterPartsByOrder(orderId));
+    container.appendChild(div);
+  });
+}
+
+let currentFilterOrderId = null;
+
+function filterPartsByOrder(orderId) {
+  currentFilterOrderId = orderId;
+  loadERPData(); // Reload with filter
+  
+  // Show clear filter button
+  const clearBtn = document.querySelector('.clear-filter-btn');
+  if (clearBtn) clearBtn.style.display = 'block';
+}
+
+function clearOrderFilter() {
+  currentFilterOrderId = null;
+  loadERPData();
+  
+  // Hide clear filter button
+  const clearBtn = document.querySelector('.clear-filter-btn');
+  if (clearBtn) clearBtn.style.display = 'none';
+}
+
+window.showCreateOrderModal = function() {
+  document.getElementById('orderModal').style.display = 'block';
+  document.getElementById('modalOrderName').value = '';
+  document.getElementById('modalClientName').value = '';
+};
+
+window.hideCreateOrderModal = function() {
+  document.getElementById('orderModal').style.display = 'none';
+};
+
+window.createOrder = async function() {
+  const orderName = document.getElementById('modalOrderName').value;
+  const clientName = document.getElementById('modalClientName').value;
+  
+  if (!orderName) {
+    alert('Введите название заказа');
+    return;
+  }
+  
+  const { db } = await getFirebase();
+  
+  const orderId = db.ref(`users/${currentUser.uid}/orders`).push().key;
+  const orderData = {
+    name: orderName,
+    clientName: clientName || '',
+    createdAt: Date.now(),
+    status: 'pending',
+    totalCost: 0
+  };
+  
+  await db.ref(`users/${currentUser.uid}/orders/${orderId}`).set(orderData);
+  
+  hideCreateOrderModal();
+  loadERPData();
+  alert('Заказ создан!');
+};
+
+function renderPartsList(parts) {
+  const container = document.getElementById('partsList');
   if (!container) return;
   
   container.innerHTML = '';
@@ -50,7 +137,17 @@ function renderPartsList(parts) {
     return;
   }
   
-  parts.forEach(part => {
+  // Filter by order if filter is set
+  const filteredParts = currentFilterOrderId 
+    ? parts.filter(p => p.orderId === currentFilterOrderId)
+    : parts;
+  
+  if (filteredParts.length === 0) {
+    container.innerHTML = '<p style="color: #666;">Нет деталей</p>';
+    return;
+  }
+  
+  filteredParts.forEach(part => {
     const div = document.createElement('div');
     div.className = 'order-card';
     div.draggable = true;
