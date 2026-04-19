@@ -1,8 +1,8 @@
 # Site settings
 title: 3D Print Cost Calculator
 description: Free online calculator for estimating 3D printing costs including materials, electricity, and labor
-baseurl: "" # the subpath of your site, e.g. /blog/
-url: "https://3dprintcostcalculator.com" # the base hostname & protocol for your site
+baseurl: "/3dprintcostcalculator" # the subpath of your site, e.g. /blog/
+url: "https://dimkaursei.github.io" # the base hostname & protocol for your site
 
 # User settings
 username: Vishal Patra
