@@ -21,7 +21,7 @@ function initPremiumUI() {
   populateMaterials();
 
   // Add auto-save for tariffs and post-processing
-  const tariffInputs = document.querySelectorAll('#monthlyRent, #monthlyHours, #electricityCost, #laborHourlyRate, #paintingLaborRate');
+  const tariffInputs = document.querySelectorAll('#monthlyRent, #electricityCost, #laborHourlyRate, #paintingLaborRate');
   tariffInputs.forEach(input => {
     if (input) {
       input.addEventListener('change', saveGlobalSettings);
@@ -166,13 +166,11 @@ async function loadGlobalSettings() {
 
     if (tariffs) {
       const monthlyRentEl = document.getElementById('monthlyRent');
-      const monthlyHoursEl = document.getElementById('monthlyHours');
       const electricityCostEl = document.getElementById('electricityCost');
       const laborHourlyRateEl = document.getElementById('laborHourlyRate');
       const paintingLaborRateEl = document.getElementById('paintingLaborRate');
 
       if (monthlyRentEl) monthlyRentEl.value = tariffs.monthlyRent || 15000;
-      if (monthlyHoursEl) monthlyHoursEl.value = tariffs.monthlyHours || 160;
       if (electricityCostEl) electricityCostEl.value = tariffs.electricityCost || 5.47;
       if (laborHourlyRateEl) laborHourlyRateEl.value = tariffs.laborRate || 500;
       if (paintingLaborRateEl) paintingLaborRateEl.value = tariffs.paintingLaborRate || 600;
@@ -335,7 +333,6 @@ async function saveGlobalSettings() {
     // Save tariffs
     const tariffs = {
       monthlyRent: parseFloat(document.getElementById('monthlyRent').value) || 15000,
-      monthlyHours: parseFloat(document.getElementById('monthlyHours').value) || 160,
       electricityCost: parseFloat(document.getElementById('electricityCost').value) || 5.47,
       laborRate: parseFloat(document.getElementById('laborHourlyRate').value) || 500
     };
