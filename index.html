@@ -193,6 +193,38 @@
             </div>
           </div>
 
+          <!-- Post-processing Section -->
+          <div class="settings-section">
+            <h4>🔧 Постобработка</h4>
+
+            <table class="post-processing-table">
+              <thead>
+                <tr>
+                  <th>Уровень</th>
+                  <th>Заточка кругов (₽)</th>
+                  <th>Абразивные круги (₽)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Лёгкий</td>
+                  <td><input type="number" id="sharpeningLight" value="50"></td>
+                  <td><input type="number" id="abrasivesLight" value="30"></td>
+                </tr>
+                <tr>
+                  <td>Средний</td>
+                  <td><input type="number" id="sharpeningMedium" value="150"></td>
+                  <td><input type="number" id="abrasivesMedium" value="80"></td>
+                </tr>
+                <tr>
+                  <td>Сильный</td>
+                  <td><input type="number" id="sharpeningHeavy" value="300"></td>
+                  <td><input type="number" id="abrasivesHeavy" value="150"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <!-- Projects Section -->
           <div class="settings-section">
             <h4>📁 Проекты</h4>
@@ -316,18 +348,13 @@
             <input type="number" id="postProcessingHours" value="1">
           </div>
 
-          <!-- Dremel -->
           <div class="input-group">
-            <label>Износ Dremel:</label>
-            <select id="dremelWearLevel">
+            <label for="postProcessingLevel">Уровень постобработки:</label>
+            <select id="postProcessingLevel">
               <option value="light">Лёгкий</option>
               <option value="medium">Средний</option>
               <option value="heavy">Сильный</option>
             </select>
-          </div>
-          <div class="input-group">
-            <label>Расходники Dremel (₽):</label>
-            <input type="number" id="dremelConsumables" value="0">
           </div>
 
           <!-- Painting -->

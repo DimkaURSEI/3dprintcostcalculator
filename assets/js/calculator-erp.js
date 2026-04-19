@@ -1121,12 +1121,23 @@ function calculateCost() {
         const laborHourlyRate = getValue('laborHourlyRate');
         const postProcessingHours = getValue('postProcessingHours');
         const laborCostTotal = laborHourlyRate * (printTime + postProcessingHours);
-        
-        // Dremel wear cost
-        const dremelWearLevel = getString('dremelWearLevel');
-        const dremelWearCost = dremelWearCosts[dremelWearLevel] || 0;
-        const dremelConsumables = getValue('dremelConsumables');
-        const totalDremelCost = dremelWearCost + dremelConsumables;
+
+        // Post-processing cost from table
+        const postProcessingLevel = getString('postProcessingLevel');
+        const sharpeningLight = parseFloat(document.getElementById('sharpeningLight')?.value) || 50;
+        const sharpeningMedium = parseFloat(document.getElementById('sharpeningMedium')?.value) || 150;
+        const sharpeningHeavy = parseFloat(document.getElementById('sharpeningHeavy')?.value) || 300;
+        const abrasivesLight = parseFloat(document.getElementById('abrasivesLight')?.value) || 30;
+        const abrasivesMedium = parseFloat(document.getElementById('abrasivesMedium')?.value) || 80;
+        const abrasivesHeavy = parseFloat(document.getElementById('abrasivesHeavy')?.value) || 150;
+
+        const postProcessingCosts = {
+          light: (sharpeningLight + abrasivesLight),
+          medium: (sharpeningMedium + abrasivesMedium),
+          heavy: (sharpeningHeavy + abrasivesHeavy)
+        };
+
+        const totalDremelCost = postProcessingCosts[postProcessingLevel] || 0;
         
         // Painting costs
         let paintingCostTotal = 0;
