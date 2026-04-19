@@ -496,7 +496,7 @@ async function saveProject() {
         paintingTime: document.getElementById('paintingTime').value,
         compressorPower: document.getElementById('compressorPower').value,
         paintChemistry: document.getElementById('paintChemistry').value,
-        paintSize: document.getElementById('paintSize').value,
+        paintArea: document.getElementById('paintArea').value,
         failureRate: document.getElementById('failureRate').value,
         complexity: document.getElementById('complexity').value
     };
@@ -553,7 +553,7 @@ async function saveAsProject() {
         paintingTime: document.getElementById('paintingTime').value,
         compressorPower: document.getElementById('compressorPower').value,
         paintChemistry: document.getElementById('paintChemistry').value,
-        paintSize: document.getElementById('paintSize').value,
+        paintArea: document.getElementById('paintArea').value,
         failureRate: document.getElementById('failureRate').value,
         complexity: document.getElementById('complexity').value
     };
@@ -659,7 +659,7 @@ async function loadProject(id) {
             document.getElementById('paintingTime').value = project.paintingTime || '';
             document.getElementById('compressorPower').value = project.compressorPower || '';
             document.getElementById('paintChemistry').value = project.paintChemistry || '';
-            document.getElementById('paintSize').value = project.paintSize || 'small';
+            document.getElementById('paintArea').value = project.paintArea || '100';
             document.getElementById('failureRate').value = project.failureRate || '';
             document.getElementById('complexity').value = project.complexity || '1.0';
 
@@ -721,12 +721,8 @@ const dremelWearCosts = {
     heavy: 300
 };
 
-// Paint size costs
-const paintSizeCosts = {
-    small: 100,
-    medium: 250,
-    large: 500
-};
+// Paint area cost (₽ per cm²)
+const paintAreaCost = 2;
 
 // Initialize the calculator
 function initCalculator() {
@@ -1179,7 +1175,7 @@ function resetForm() {
         'paintingTime': 1,
         'compressorPower': 500,
         'paintChemistry': 50,
-        'paintSize': 'small',
+        'paintArea': 100,
         'failureRate': 10
     };
     
@@ -1339,7 +1335,7 @@ function calculateCost() {
             const paintingTime = getValue('paintingTime');
             const compressorPower = getValue('compressorPower');
             const paintChemistry = getValue('paintChemistry');
-            const paintSize = getString('paintSize');
+            const paintArea = getValue('paintArea') || 0;
             
             // Painting electricity (compressor)
             const paintingPowerCost = (compressorPower * paintingTime * electricityCost) / 1000;
@@ -1348,10 +1344,10 @@ function calculateCost() {
             const paintingLaborRate = getValue('paintingLaborRate') || laborHourlyRate;
             const paintingLaborCost = paintingLaborRate * paintingTime;
             
-            // Paint size cost
-            const paintSizeCost = paintSizeCosts[paintSize] || 0;
+            // Paint area cost (₽ per cm²)
+            const paintAreaCost = paintArea * paintAreaCost;
             
-            paintingCostTotal = paintingPowerCost + paintingLaborCost + paintChemistry + paintSizeCost;
+            paintingCostTotal = paintingPowerCost + paintingLaborCost + paintChemistry + paintAreaCost;
         }
         
         // Get quantity
