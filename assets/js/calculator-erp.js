@@ -476,8 +476,7 @@ async function saveProject() {
         createdAt: editingId ? (await db.ref(`users/${currentUser.uid}/projects/${editingId}/createdAt`).once('value')).val() : Date.now(),
         printType: document.getElementById('printType').value,
         quantity: document.getElementById('quantity').value,
-        printerCount: document.getElementById('printerCount').value,
-        printerId: document.getElementById('printerSelect').value,
+        printerIds: Array.from(document.getElementById('printerSelect').selectedOptions).map(opt => opt.value),
         materialId: document.getElementById('materialSelect').value,
         filamentType: document.getElementById('filamentType').value,
         filamentCost: document.getElementById('filamentCost').value,
@@ -533,8 +532,7 @@ async function saveAsProject() {
         createdAt: Date.now(),
         printType: document.getElementById('printType').value,
         quantity: document.getElementById('quantity').value,
-        printerCount: document.getElementById('printerCount').value,
-        printerId: document.getElementById('printerSelect').value,
+        printerIds: Array.from(document.getElementById('printerSelect').selectedOptions).map(opt => opt.value),
         materialId: document.getElementById('materialSelect').value,
         filamentType: document.getElementById('filamentType').value,
         filamentCost: document.getElementById('filamentCost').value,
@@ -584,13 +582,22 @@ async function loadProject(id) {
             // Migration: quantity defaults to 1 for old projects
             document.getElementById('quantity').value = project.quantity || 1;
 
-            // Migration: printerCount defaults to 1 for old projects
-            document.getElementById('printerCount').value = project.printerCount || 1;
-
             // Load printer/material selections
             if (document.getElementById('printerSelect')) {
-                document.getElementById('printerSelect').value = project.printerId || '';
-                if (project.printerId && typeof updatePrinterDefaults === 'function') {
+                const printerSelect = document.getElementById('printerSelect');
+                // Handle both old (single printerId) and new (printerIds array) formats
+                const printerIds = project.printerIds || (project.printerId ? [project.printerId] : []);
+                
+                // Clear all selections
+                Array.from(printerSelect.options).forEach(opt => opt.selected = false);
+                
+                // Select the printers
+                printerIds.forEach(id => {
+                    const option = printerSelect.querySelector(`option[value="${id}"]`);
+                    if (option) option.selected = true;
+                });
+                
+                if (printerIds.length > 0 && typeof updatePrinterDefaults === 'function') {
                     updatePrinterDefaults();
                 }
             }
@@ -1233,16 +1240,38 @@ function calculateCost() {
         const printType = getString('printType');
         
         // Equipment costs
-        // Get printer data from selected printer or fallback to inputs
+        // Get printer data from selected printers or fallback to inputs
         const printerSelect = document.getElementById('printerSelect');
-        let equipmentCost, equipmentLifespan;
+        let equipmentCost, equipmentLifespan, totalPrinterWattage, selectedPrinterCount;
 
-        if (printerSelect && printerSelect.value) {
-          equipmentCost = parseFloat(document.getElementById('selectedPrinterCost').value) || 0;
-          equipmentLifespan = parseFloat(document.getElementById('selectedPrinterLifespan').value) || 1;
+        if (printerSelect && printerSelect.selectedOptions && printerSelect.selectedOptions.length > 0) {
+          // Multiple printers selected
+          selectedPrinterCount = printerSelect.selectedOptions.length;
+          
+          // Sum up values from all selected printers
+          let totalCost = 0;
+          let totalLifespan = 0;
+          let totalPower = 0;
+          
+          for (let option of printerSelect.selectedOptions) {
+            const cost = parseFloat(option.dataset.cost) || 0;
+            const lifespan = parseFloat(option.dataset.lifespan) || 1;
+            const power = parseFloat(option.dataset.power) || 300;
+            
+            totalCost += cost;
+            totalLifespan += lifespan;
+            totalPower += power;
+          }
+          
+          equipmentCost = totalCost;
+          equipmentLifespan = totalLifespan / selectedPrinterCount; // Average lifespan
+          totalPrinterWattage = totalPower;
         } else {
+          // Fallback to old fields for backward compatibility
           equipmentCost = getValue('equipmentCost');
           equipmentLifespan = getValue('equipmentLifespan');
+          totalPrinterWattage = getValue('printerWattage');
+          selectedPrinterCount = 1;
         }
 
         const monthlyRent = getValue('monthlyRent');
@@ -1282,18 +1311,12 @@ function calculateCost() {
         const printHours = getValue('printHours');
         const printMinutes = getValue('printMinutes');
         const electricityCost = getValue('electricityCost');
-        const printerWattage = printerSelect && printerSelect.value
-          ? parseFloat(document.getElementById('selectedPrinterPower').value) || 300
-          : getValue('printerWattage');
-
-        // Get printer count
-        const printerCount = getValue('printerCount') || 1;
 
         // Calculate total print time in hours
         const printTime = printHours + (printMinutes / 60);
 
         // Effective print time (parallel printing)
-        const effectivePrintTime = printTime / printerCount;
+        const effectivePrintTime = printTime / selectedPrinterCount;
 
         // Equipment depreciation (use effective time)
         const depreciationCost = equipmentLifespan > 0 ? (equipmentCost / equipmentLifespan) * effectivePrintTime : 0;
@@ -1303,8 +1326,8 @@ function calculateCost() {
         const hourlyRent = monthlyRent / hoursPerMonth;
         const rentCost = hourlyRent * effectivePrintTime;
 
-        // Electricity cost (multiply by printerCount - all printers running)
-        const powerCost = (printerWattage * printerCount * effectivePrintTime * electricityCost) / 1000;
+        // Electricity cost (all selected printers running)
+        const powerCost = (totalPrinterWattage * effectivePrintTime * electricityCost) / 1000;
         
         // Work & Post-processing
         const laborHourlyRate = getValue('laborHourlyRate');

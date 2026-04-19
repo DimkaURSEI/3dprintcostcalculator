@@ -290,12 +290,23 @@ async function populatePrinterDropdown() {
 
 function updatePrinterDefaults() {
   const select = document.getElementById('printerSelect');
-  const selectedOption = select.options[select.selectedIndex];
-
-  if (selectedOption && selectedOption.value) {
-    document.getElementById('selectedPrinterCost').value = selectedOption.dataset.cost;
-    document.getElementById('selectedPrinterLifespan').value = selectedOption.dataset.lifespan;
-    document.getElementById('selectedPrinterPower').value = selectedOption.dataset.power;
+  
+  if (select.selectedOptions && select.selectedOptions.length > 0) {
+    let totalCost = 0;
+    let totalLifespan = 0;
+    let totalPower = 0;
+    
+    for (let option of select.selectedOptions) {
+      totalCost += parseFloat(option.dataset.cost) || 0;
+      totalLifespan += parseFloat(option.dataset.lifespan) || 1;
+      totalPower += parseFloat(option.dataset.power) || 300;
+    }
+    
+    const selectedCount = select.selectedOptions.length;
+    document.getElementById('selectedPrinterCost').value = totalCost;
+    document.getElementById('selectedPrinterLifespan').value = totalLifespan / selectedCount;
+    document.getElementById('selectedPrinterPower').value = totalPower;
+    
     if (typeof calculateCost === 'function') {
       calculateCost();
     }
