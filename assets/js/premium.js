@@ -67,18 +67,12 @@ function initPremiumUI() {
   populateMaterials();
 
   // Add auto-save for tariffs and post-processing
-  const tariffInputs = document.querySelectorAll('#monthlyRent, #monthlyHours, #electricityCost, #laborHourlyRate');
+  const tariffInputs = document.querySelectorAll('#monthlyRent, #monthlyHours, #electricityCost, #laborHourlyRate, #paintingLaborRate');
   tariffInputs.forEach(input => {
     if (input) {
       input.addEventListener('change', saveGlobalSettings);
     }
   });
-
-  // paintingLaborRate will be added in Task 7
-  const paintingLaborRateEl = document.getElementById('paintingLaborRate');
-  if (paintingLaborRateEl) {
-    paintingLaborRateEl.addEventListener('change', saveGlobalSettings);
-  }
 
   // Post-processing table will be added in Task 6
   const postProcessingInputs = document.querySelectorAll('.post-processing-table input');

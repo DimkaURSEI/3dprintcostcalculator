@@ -1150,9 +1150,10 @@ function calculateCost() {
             
             // Painting electricity (compressor)
             const paintingPowerCost = (compressorPower * paintingTime * electricityCost) / 1000;
-            
-            // Painting labor
-            const paintingLaborCost = laborHourlyRate * paintingTime;
+
+            // Painting labor (use separate painting labor rate)
+            const paintingLaborRate = getValue('paintingLaborRate') || laborHourlyRate;
+            const paintingLaborCost = paintingLaborRate * paintingTime;
             
             // Paint size cost
             const paintSizeCost = paintSizeCosts[paintSize] || 0;
