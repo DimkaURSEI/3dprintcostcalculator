@@ -38,7 +38,7 @@ postProcessing/
 
 ## Orders (per calculation)
 
-projects/
+projects/ (legacy - will be migrated to orders)
   {projectId}/
     name: string
     createdAt: timestamp
@@ -66,6 +66,34 @@ projects/
     assignedPaintingId: string
     estimatedTime: number (minutes)
     removalTime: number (minutes, default 5)
+
+orders/ (new structure)
+  {orderId}/
+    name: string
+    clientName: string (optional)
+    createdAt: timestamp
+    status: "pending" | "in_progress" | "completed"
+  {orderId}/parts/{partId}/
+    name: string
+    materialType: string
+    materialCost: number
+    partWeight: number (g, FDM only)
+    partVolume: number (ml, SLA only)
+    quantity: number
+    printHours: number
+    printMinutes: number
+    estimatedCost: number
+
+assignments/ (new structure)
+  {assignmentId}/
+    orderId: string
+    partId: string
+    printerId: string (from equipment/)
+    stationId: string (for post-processing/painting)
+    quantity: number
+    status: "pending" | "in_progress" | "completed"
+    assignedAt: timestamp
+    completedAt: timestamp
 
 ## Scheduling (new)
 
