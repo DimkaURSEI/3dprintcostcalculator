@@ -182,6 +182,15 @@ body {
   transition: all 0.2s ease;
 }
 
+.bottom-nav .nav-item.active i,
+.bottom-nav .nav-item.active span {
+  color: var(--primary);
+}
+
+.bottom-nav .nav-item.active {
+  background: rgba(37, 99, 235, 0.1);
+}
+
 /* Header */
 .app-header {
   background: var(--bg-secondary);
