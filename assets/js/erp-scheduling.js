@@ -77,7 +77,7 @@ function renderPartsList(parts) {
   });
 }
 
-function renderPrintersList(printers) {
+async function renderPrintersList(printers) {
   const container = document.getElementById('printersList');
   if (!container) return;
   
@@ -88,14 +88,28 @@ function renderPrintersList(printers) {
     return;
   }
   
+  // Load assignments to show on each printer
+  const assignments = await loadAssignments();
+  
   Object.entries(printers).forEach(([id, item]) => {
     const div = document.createElement('div');
     div.className = 'station-card printer-card';
     div.dataset.printerId = id;
+    
+    // Find assignments for this printer
+    const printerAssignments = Object.entries(assignments)
+      .filter(([_, assignment]) => assignment.printerId === id)
+      .map(([assignmentId, assignment]) => ({ assignmentId, ...assignment }));
+    
+    const assignmentsHtml = printerAssignments.length > 0 
+      ? printerAssignments.map(a => `<div class="assigned-part">×${a.quantity} детали</div>`).join('')
+      : '<div class="no-assignments">Нет назначений</div>';
+    
     div.innerHTML = `
       <strong>${item.name}</strong>
       <small>Статус: available</small>
-      <div class="drop-zone" data-station-type="printer" data-station-id="${id}">📥 Перетащите заказ</div>
+      <div class="assignments-list">${assignmentsHtml}</div>
+      <div class="drop-zone" data-station-type="printer" data-station-id="${id}">📥 Перетащите деталь</div>
     `;
     div.addEventListener('dragover', handleDragOver);
     div.addEventListener('drop', handleDrop);
@@ -144,6 +158,44 @@ function renderPaintingStations() {
     dropZone.addEventListener('drop', handleDrop);
     dropZone.addEventListener('dragleave', handleDragLeave);
   }
+}
+
+async function saveAssignment(orderId, partId, stationType, stationId, quantity) {
+  const { db } = await getFirebase();
+  
+  const assignmentId = db.ref(`users/${currentUser.uid}/assignments`).push().key;
+  const assignmentData = {
+    orderId,
+    partId,
+    printerId: stationType === 'printer' ? stationId : null,
+    stationId: stationType !== 'printer' ? stationId : null,
+    stationType,
+    quantity,
+    status: 'pending',
+    assignedAt: Date.now(),
+    completedAt: null
+  };
+  
+  await db.ref(`users/${currentUser.uid}/assignments/${assignmentId}`).set(assignmentData);
+  
+  // Update part's assigned quantity
+  const partSnapshot = await db.ref(`users/${currentUser.uid}/orders/${orderId}/parts/${partId}`).once('value');
+  const part = partSnapshot.val();
+  const currentAssigned = part.assignedQuantity || 0;
+  await db.ref(`users/${currentUser.uid}/orders/${orderId}/parts/${partId}`).update({
+    assignedQuantity: currentAssigned + quantity
+  });
+  
+  return assignmentId;
+}
+
+async function loadAssignments() {
+  const { db } = await getFirebase();
+  
+  const snapshot = await db.ref(`users/${currentUser.uid}/assignments`).once('value');
+  const assignments = snapshot.val();
+  
+  return assignments || {};
 }
 
 // Drag and drop handlers
@@ -218,8 +270,12 @@ async function handleDrop(e) {
       return;
     }
     
-    // Create assignment (will be fully implemented in Task 6)
-    console.log(`Assigning ${qty} of part ${partId} to ${stationType} ${stationId}`);
+    // Save assignment
+    await saveAssignment(orderId, partId, stationType, stationId, qty);
+    
+    // Reload data to show updated assigned quantities
+    loadERPData();
+    
     alert(`Назначено: ${qty} деталей на ${stationType} ${stationId}`);
     
   } catch (error) {

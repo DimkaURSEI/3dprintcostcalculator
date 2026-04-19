@@ -564,6 +564,31 @@ body {
   color: var(--primary);
 }
 
+/* ERP Assignments */
+.assignments-list {
+  margin: 12px 0;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+}
+
+.assigned-part {
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.assigned-part:last-child {
+  border-bottom: none;
+}
+
+.no-assignments {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  padding: 4px 0;
+}
+
 .input-group {
   margin-bottom: 16px;
 }
