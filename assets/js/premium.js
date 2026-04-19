@@ -63,6 +63,9 @@ function initPremiumUI() {
   // Populate printer dropdown from equipment/
   populatePrinterDropdown();
 
+  // Populate materials dropdown
+  populateMaterials();
+
   // Add auto-save for tariffs and post-processing
   const tariffInputs = document.querySelectorAll('#monthlyRent, #monthlyHours, #electricityCost, #laborHourlyRate');
   tariffInputs.forEach(input => {
@@ -299,6 +302,59 @@ function updatePrinterDefaults() {
     document.getElementById('selectedPrinterCost').value = selectedOption.dataset.cost;
     document.getElementById('selectedPrinterLifespan').value = selectedOption.dataset.lifespan;
     document.getElementById('selectedPrinterPower').value = selectedOption.dataset.power;
+    if (typeof calculateCost === 'function') {
+      calculateCost();
+    }
+  }
+}
+
+async function populateMaterials() {
+  if (!currentUser) return;
+
+  const { db } = await getFirebase();
+
+  try {
+    const snapshot = await db.ref(`users/${currentUser.uid}/materials`).once('value');
+    const materials = snapshot.val();
+
+    const select = document.getElementById('materialSelect');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Выберите материал</option>';
+
+    if (materials) {
+      Object.entries(materials).forEach(([id, item]) => {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = `${item.name} (${item.cost}₽/${item.unit})`;
+        option.dataset.cost = item.cost;
+        option.dataset.power = item.power || 300;
+        option.dataset.type = item.type || 'FDM';
+        option.dataset.unit = item.unit;
+        select.appendChild(option);
+      });
+    }
+  } catch (error) {
+    console.error('Error loading materials:', error);
+  }
+}
+
+function updateMaterialDefaults() {
+  const select = document.getElementById('materialSelect');
+  const selectedOption = select.options[select.selectedIndex];
+
+  if (selectedOption && selectedOption.value) {
+    document.getElementById('materialCost').value = selectedOption.dataset.cost;
+    document.getElementById('materialPower').value = selectedOption.dataset.power;
+    document.getElementById('materialType').value = selectedOption.dataset.type;
+
+    // Toggle FDM/SLA based on material type
+    const materialType = selectedOption.dataset.type;
+    document.getElementById('printType').value = materialType.toLowerCase();
+    if (typeof togglePrintType === 'function') {
+      togglePrintType();
+    }
+
     if (typeof calculateCost === 'function') {
       calculateCost();
     }

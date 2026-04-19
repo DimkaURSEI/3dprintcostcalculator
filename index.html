@@ -241,6 +241,17 @@
           <input type="hidden" id="selectedPrinterLifespan">
           <input type="hidden" id="selectedPrinterPower">
 
+          <div class="input-group">
+            <label for="materialSelect">Материал:</label>
+            <select id="materialSelect" onchange="updateMaterialDefaults()">
+              <option value="">Выберите материал</option>
+            </select>
+          </div>
+
+          <input type="hidden" id="materialCost">
+          <input type="hidden" id="materialPower">
+          <input type="hidden" id="materialType">
+
           <!-- FDM Parameters -->
           <div class="fdm-section">
             <div class="input-group">

@@ -1057,17 +1057,28 @@ function calculateCost() {
         }
 
         const monthlyRent = getValue('monthlyRent');
-        
+
+        // Get material data
+        const materialSelect = document.getElementById('materialSelect');
+        let materialCostPerUnit, materialUnit;
+
+        if (materialSelect && materialSelect.value) {
+          materialCostPerUnit = parseFloat(document.getElementById('materialCost').value) || 0;
+          materialUnit = document.getElementById('materialSelect').options[materialSelect.selectedIndex].dataset.unit || 'kg';
+        } else {
+          // Fallback to old fields for backward compatibility
+          materialCostPerUnit = printType === 'fdm' ? getValue('filamentCost') : getValue('resinCost');
+          materialUnit = printType === 'fdm' ? 'kg' : 'liter';
+        }
+
         // Material costs
         let materialCost = 0;
         if (printType === 'fdm') {
-            const filamentCost = getValue('filamentCost');
-            const printWeight = getValue('printWeight');
-            materialCost = (filamentCost * printWeight) / 1000;
+            const partWeight = getValue('partWeight');
+            materialCost = (materialCostPerUnit * partWeight) / 1000;
         } else {
-            const resinCost = getValue('resinCost');
-            const printVolume = getValue('printVolume');
-            materialCost = (resinCost * printVolume) / 1000;
+            const partVolume = getValue('partVolume');
+            materialCost = (materialCostPerUnit * partVolume) / 1000;
             
             // Auto-calculate alcohol cost for SLA (approximately 10% of resin cost)
             const alcoholCost = materialCost * 0.1;
