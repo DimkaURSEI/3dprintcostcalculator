@@ -11,35 +11,36 @@ const firebaseConfig = {
 
 // Load Firebase SDK from CDN
 const loadFirebase = async () => {
-  if (window.firebaseInitialized) return;
+  if (window.firebaseInitialized) return window.firebase;
   
   // Load Firebase App
-  const appScript = document.createElement('script');
-  appScript.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js';
-  document.head.appendChild(appScript);
-  
-  await new Promise(resolve => appScript.onload = resolve);
+  await loadScript('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
   
   // Load Firebase Auth
-  const authScript = document.createElement('script');
-  authScript.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js';
-  document.head.appendChild(authScript);
-  
-  await new Promise(resolve => authScript.onload = resolve);
+  await loadScript('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js');
   
   // Load Firebase Database
-  const dbScript = document.createElement('script');
-  dbScript.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js';
-  document.head.appendChild(dbScript);
-  
-  await new Promise(resolve => dbScript.onload = resolve);
+  await loadScript('https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js');
   
   // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  window.firebaseInitialized = true;
-  
-  return firebase;
+  if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    window.firebaseInitialized = true;
+    return firebase;
+  } else {
+    throw new Error('Firebase SDK failed to load');
+  }
 };
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
 
 let firebase = null;
 let auth = null;

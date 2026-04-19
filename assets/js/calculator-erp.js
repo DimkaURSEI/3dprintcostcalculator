@@ -1115,7 +1115,7 @@ function calculateCost() {
         const failureRate = getValue('failureRate');
         const riskCost = subtotal * (failureRate / 100);
         const complexity = parseFloat(document.getElementById('complexity').value) || 1.0;
-        const complexityCost = (laborCostTotal + postProcessingCost) * (complexity - 1);
+        const complexityCost = laborCostTotal * (complexity - 1);
         const totalCost = subtotal + riskCost + complexityCost;
         
         // Update results with animations
