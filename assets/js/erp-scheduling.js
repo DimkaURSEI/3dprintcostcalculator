@@ -56,12 +56,16 @@ function renderPartsList(parts) {
     div.draggable = true;
     div.dataset.partId = part.id;
     div.dataset.orderId = part.orderId;
+    div.dataset.totalQuantity = part.quantity;
+    div.dataset.assignedQuantity = part.assignedQuantity || 0;
+    
+    const remaining = part.quantity - (part.assignedQuantity || 0);
     
     div.innerHTML = `
       <div class="order-info">
         <strong>${part.orderName}</strong>
         <div>${part.name}</div>
-        <div>× ${part.quantity}</div>
+        <div>Всего: ${part.quantity} | Назначено: ${part.assignedQuantity || 0} | Осталось: ${remaining}</div>
         <div>${part.filamentType || part.materialType}</div>
       </div>
     `;
@@ -187,9 +191,39 @@ async function handleDrop(e) {
   try {
     const { partId, orderId } = JSON.parse(data);
     
-    // Placeholder - will implement full assignment with quantity prompt in Task 5
-    console.log('Dropped part', partId, 'from order', orderId, 'to', stationType, stationId);
+    // Get part data to show available quantity
+    const { db } = await getFirebase();
+    const partSnapshot = await db.ref(`users/${currentUser.uid}/orders/${orderId}/parts/${partId}`).once('value');
+    const part = partSnapshot.val();
+    
+    if (!part) {
+      alert('Деталь не найдена');
+      return;
+    }
+    
+    // Prompt for quantity
+    const quantity = prompt(`Сколько деталей "${part.name}" (доступно: ${part.quantity}) на этом станке?`, part.quantity);
+    
+    if (quantity === null) return; // User cancelled
+    
+    const qty = parseInt(quantity);
+    
+    if (isNaN(qty) || qty <= 0) {
+      alert('Некорректное количество');
+      return;
+    }
+    
+    if (qty > part.quantity) {
+      alert(`Недостаточно деталей. Доступно: ${part.quantity}`);
+      return;
+    }
+    
+    // Create assignment (will be fully implemented in Task 6)
+    console.log(`Assigning ${qty} of part ${partId} to ${stationType} ${stationId}`);
+    alert(`Назначено: ${qty} деталей на ${stationType} ${stationId}`);
+    
   } catch (error) {
-    console.error('Error parsing drop data:', error);
+    console.error('Error in handleDrop:', error);
+    alert('Ошибка: ' + error.message);
   }
 }
