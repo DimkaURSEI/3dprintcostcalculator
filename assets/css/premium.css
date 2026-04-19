@@ -135,71 +135,8 @@ body {
 /* App Container */
 .app-container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   min-height: 100vh;
-}
-
-/* Navigation Sidebar */
-.nav-sidebar {
-  width: 80px;
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  padding: 24px 0;
-  flex-shrink: 0;
-}
-
-/* Main content wrapper */
-.main-content-wrapper {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-  border-left: 3px solid transparent;
-  margin-bottom: 8px;
-}
-
-.nav-item i {
-  font-size: 1.5rem;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-  transition: all 0.2s;
-}
-
-.nav-item span {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  text-align: center;
-  transition: all 0.2s;
-}
-
-.nav-item:hover {
-  background: var(--bg-tertiary);
-}
-
-.nav-item:hover i,
-.nav-item:hover span {
-  color: var(--text-primary);
-}
-
-.nav-item.active {
-  background: rgba(37, 99, 235, 0.1);
-  border-left-color: var(--primary);
-}
-
-.nav-item.active i,
-.nav-item.active span {
-  color: var(--primary);
 }
 
 /* Header */

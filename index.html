@@ -94,46 +94,8 @@
       </div>
     </header>
 
-    <!-- Navigation Sidebar -->
-    <aside class="nav-sidebar">
-      <div class="nav-item active" onclick="switchTab('calculator')" data-tab="calculator">
-        <i class="fas fa-calculator"></i>
-        <span>Калькулятор</span>
-      </div>
-      <div class="nav-item" onclick="switchTab('erp')" data-tab="erp">
-        <i class="fas fa-tasks"></i>
-        <span>ERP Планирование</span>
-      </div>
-    </aside>
-
-    <!-- Main Content Wrapper -->
-    <div class="main-content-wrapper">
-      <!-- Header -->
-      <header class="app-header">
-        <div class="header-left">
-          <h1>3D Print ERP</h1>
-          <button class="settings-toggle" onclick="toggleSettings()">
-            <i class="fas fa-cog"></i>
-            <span>Настройки</span>
-          </button>
-        </div>
-        <div class="header-center">
-          <select id="printType" onchange="togglePrintType()">
-            <option value="fdm">FDM</option>
-            <option value="sla">SLA</option>
-          </select>
-          <select id="projectSelect">
-            <option value="">Выберите проект</option>
-          </select>
-        </div>
-        <div class="header-right">
-          <span id="userInfo"></span>
-          <button onclick="handleLogout()" class="icon-btn"><i class="fas fa-sign-out-alt"></i></button>
-        </div>
-      </header>
-
-      <!-- Main Content Grid -->
-      <div class="main-grid">
+    <!-- Main Content Grid -->
+    <div class="main-grid">
       <!-- Settings Sidebar -->
       <aside id="settingsSidebar" class="settings-sidebar">
         <div class="sidebar-header">
@@ -520,7 +482,6 @@
         </aside>
       </div>
     </div>
-  </div>
   </div>
 
   <!-- Mobile Settings Drawer -->
