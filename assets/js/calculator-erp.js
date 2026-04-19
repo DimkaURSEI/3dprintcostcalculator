@@ -1061,20 +1061,26 @@ function calculateCost() {
         const printMinutes = getValue('printMinutes');
         const electricityCost = getValue('electricityCost');
         const printerWattage = getValue('printerWattage');
-        
+
+        // Get printer count
+        const printerCount = getValue('printerCount') || 1;
+
         // Calculate total print time in hours
         const printTime = printHours + (printMinutes / 60);
-        
-        // Equipment depreciation
-        const depreciationCost = equipmentLifespan > 0 ? (equipmentCost / equipmentLifespan) * printTime : 0;
-        
-        // Rent cost (hourly rate)
+
+        // Effective print time (parallel printing)
+        const effectivePrintTime = printTime / printerCount;
+
+        // Equipment depreciation (use effective time)
+        const depreciationCost = equipmentLifespan > 0 ? (equipmentCost / equipmentLifespan) * effectivePrintTime : 0;
+
+        // Rent cost (hourly rate, use effective time)
         const hoursPerMonth = 30 * 24;
         const hourlyRent = monthlyRent / hoursPerMonth;
-        const rentCost = hourlyRent * printTime;
-        
-        // Electricity cost
-        const powerCost = (printerWattage * printTime * electricityCost) / 1000;
+        const rentCost = hourlyRent * effectivePrintTime;
+
+        // Electricity cost (multiply by printerCount - all printers running)
+        const powerCost = (printerWattage * printerCount * effectivePrintTime * electricityCost) / 1000;
         
         // Work & Post-processing
         const laborHourlyRate = getValue('laborHourlyRate');
