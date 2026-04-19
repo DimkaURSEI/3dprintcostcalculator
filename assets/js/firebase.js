@@ -1,12 +1,11 @@
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAftZelopjfPRrZRXc6zNIeK68LK2aiw9k",
-  authDomain: "d-print-calc-fdd82.firebaseapp.com",
-  projectId: "d-print-calc-fdd82",
-  storageBucket: "d-print-calc-fdd82.firebasestorage.app",
-  messagingSenderId: "610943004818",
-  appId: "1:610943004818:web:44f7feece65ad580a4764b",
-  measurementId: "G-WG9H3FHZEM"
+  apiKey: "AIzaSyC19H2qQWAzvPqPYtjZkIquWirCqrOlIUk",
+  authDomain: "dprintapp-710a8.firebaseapp.com",
+  projectId: "dprintapp-710a8",
+  storageBucket: "dprintapp-710a8.firebasestorage.app",
+  messagingSenderId: "713699677790",
+  appId: "1:713699677790:web:bcf5c670cedecb60c946cf"
 };
 
 // Load Firebase SDK from CDN
