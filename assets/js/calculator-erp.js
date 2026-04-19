@@ -800,6 +800,9 @@ function initCalculator() {
     // Load equipment from Firebase
     loadEquipment();
     
+    // Load material options including custom materials
+    loadMaterialOptions();
+    
     // Load consumables from Firebase
     loadConsumables();
     
@@ -1068,22 +1071,68 @@ function updateLayout() {
     }
 }
 
-function updateDefaultValues() {
+window.updateDefaultValues = async function() {
     const filamentType = document.getElementById('filamentType');
     if (!filamentType) return;
     
-    const defaults = filamentDefaults[filamentType.value];
+    // Preset materials
+    const presetCosts = {
+        'pla': 2000,
+        'abs': 2500,
+        'petg': 2200,
+        'tpu': 3000
+    };
     
-    if (filamentType.value !== 'custom') {
+    if (presetCosts[filamentType.value]) {
         const filamentCostInput = document.getElementById('filamentCost');
-        const printerWattageInput = document.getElementById('printerWattage');
+        if (filamentCostInput) filamentCostInput.value = presetCosts[filamentType.value];
+    } else if (filamentType.value !== 'custom') {
+        // Load custom material cost from database
+        const { db } = await getFirebase();
+        const snapshot = await db.ref(`users/${currentUser.uid}/consumables/${filamentType.value}`).once('value');
+        const material = snapshot.val();
         
-        if (filamentCostInput) filamentCostInput.value = defaults.cost;
-        if (printerWattageInput) printerWattageInput.value = defaults.wattage;
+        if (material) {
+            const filamentCostInput = document.getElementById('filamentCost');
+            if (filamentCostInput) filamentCostInput.value = material.cost;
+        }
     }
     
     calculateCost();
 }
+
+// Load material options including custom materials from Settings
+window.loadMaterialOptions = async function() {
+  if (!currentUser) return;
+  
+  const { db } = await getFirebase();
+  const snapshot = await db.ref(`users/${currentUser.uid}/consumables`).once('value');
+  const consumables = snapshot.val();
+  
+  const select = document.getElementById('filamentType');
+  if (!select) return;
+  
+  // Keep presets
+  select.innerHTML = `
+    <option value="pla">PLA</option>
+    <option value="abs">ABS</option>
+    <option value="petg">PETG</option>
+    <option value="tpu">TPU</option>
+    <option value="custom">Другой</option>
+  `;
+  
+  // Add custom materials (only those with unit 'кг')
+  if (consumables) {
+    Object.entries(consumables).forEach(([id, item]) => {
+      if (item.unit === 'кг') {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = `${item.name} (${item.cost}₽/кг)`;
+        select.appendChild(option);
+      }
+    });
+  }
+};
 
 // Tab switching
 window.switchTab = function(tabName) {
