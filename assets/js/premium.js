@@ -1,56 +1,10 @@
 // Premium UI JavaScript for 3D Print ERP Calculator
 
-// Toggle settings sidebar/drawer
-window.toggleSettings = function() {
-  const sidebar = document.getElementById('settingsSidebar');
-  const mobileDrawer = document.getElementById('mobileSettingsDrawer');
-  
-  if (window.innerWidth >= 992) {
-    // Desktop: toggle sidebar
-    if (sidebar.style.display === 'none') {
-      sidebar.style.display = 'flex';
-    } else {
-      sidebar.style.display = 'none';
-    }
-  } else {
-    // Mobile: toggle drawer
-    mobileDrawer.classList.toggle('open');
-  }
-}
-
-// Close mobile drawer
-function closeMobileDrawer() {
-  const mobileDrawer = document.getElementById('mobileSettingsDrawer');
-  mobileDrawer.classList.remove('open');
-}
-
 // Initialize premium UI
 function initPremiumUI() {
   // Check auth state
   const authSection = document.getElementById('authModal');
   const mainApp = document.getElementById('mainApp');
-
-  // Show/hide settings sidebar based on screen size
-  function updateLayout() {
-    const sidebar = document.getElementById('settingsSidebar');
-    if (window.innerWidth >= 992) {
-      sidebar.style.display = 'flex';
-    } else {
-      sidebar.style.display = 'none';
-    }
-  }
-
-  // Initial layout
-  updateLayout();
-
-  // Update on resize
-  window.addEventListener('resize', updateLayout);
-
-  // Close drawer on overlay click
-  const drawerOverlay = document.querySelector('.drawer-overlay');
-  if (drawerOverlay) {
-    drawerOverlay.addEventListener('click', closeMobileDrawer);
-  }
 
   // Initialize calculator
   if (typeof initCalculator === 'function') {
