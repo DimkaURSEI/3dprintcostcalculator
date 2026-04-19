@@ -8,48 +8,23 @@ const firebaseConfig = {
   appId: "1:713699677790:web:bcf5c670cedecb60c946cf"
 };
 
-// Load Firebase SDK from CDN
-const loadFirebase = async () => {
-  if (window.firebaseInitialized) return window.firebase;
-  
-  // Load Firebase App
-  await loadScript('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
-  
-  // Load Firebase Auth
-  await loadScript('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js');
-  
-  // Load Firebase Database
-  await loadScript('https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js');
-  
-  // Initialize Firebase
-  if (typeof firebase !== 'undefined') {
-    firebase.initializeApp(firebaseConfig);
-    window.firebaseInitialized = true;
-    return firebase;
-  } else {
-    throw new Error('Firebase SDK failed to load');
-  }
-};
-
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = src;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-}
-
 let firebase = null;
 let auth = null;
 let db = null;
 
 async function getFirebase() {
   if (!firebase) {
-    firebase = await loadFirebase();
+    console.log('[Firebase] Initializing Firebase...');
+    console.log('[Firebase] firebase object:', typeof firebase);
+    
+    if (typeof firebase === 'undefined' || firebase === null) {
+      throw new Error('Firebase SDK not loaded. Check if scripts are loaded in HTML.');
+    }
+    
+    firebase.initializeApp(firebaseConfig);
     auth = firebase.auth();
     db = firebase.database();
+    console.log('[Firebase] Firebase initialized successfully');
   }
   return { firebase, auth, db };
 }

@@ -6,7 +6,13 @@
       "**/.*",
       "**/node_modules/**",
       "firebase-debug.log",
-      "test.html"
+      "test.html",
+      "_site",
+      "_layouts",
+      "_includes",
+      "blog",
+      "src",
+      "index-jekyll.html"
     ]
   }
 }

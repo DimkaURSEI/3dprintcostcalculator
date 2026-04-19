@@ -1,395 +1,293 @@
----
-layout: default
----
-<div class="calculator-box">
-  <h2>🖨️ 3D Print ERP Calculator</h2>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1971c2">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+
+  <!-- Preconnect to origins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   
-  <!-- Auth Section -->
-  <div class="section-group" id="authSection">
-    <h3>🔐 Авторизация</h3>
-    <div class="input-group">
-      <label for="authEmail">Email:</label>
-      <input type="email" id="authEmail" placeholder="your@email.com">
-    </div>
-    <div class="input-group">
-      <label for="authPassword">Пароль:</label>
-      <input type="password" id="authPassword" placeholder="••••••••">
-    </div>
-    <div class="button-group">
-      <button onclick="handleLogin(event)" class="calculate-btn">Войти</button>
-      <button onclick="handleRegister(event)" class="save-btn">Зарегистрироваться</button>
-    </div>
-  </div>
+  <!-- Title and meta description -->
+  <title>3D Print ERP Calculator</title>
+  <meta name="description" content="ERP калькулятор для 3D печати с управлением проектами, оборудованием и расходниками">
 
-  <!-- User Info -->
-  <div class="section-group" id="userInfo" style="display: none;">
-    <span></span>
-    <button onclick="handleLogout()" class="reset-btn">Выйти</button>
-  </div>
-
-  <!-- Calculator Section -->
-  <div id="calculatorSection" style="display: none;">
+  <!-- Font display strategy for webfonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   
-  <!-- Print Type Toggle -->
-  <div class="section-group">
-    <h3>Тип печати</h3>
-    <div class="input-group inline">
-      <label for="printType">Тип:</label>
-      <select id="printType" onchange="togglePrintType()">
-        <option value="fdm">FDM (Филамент)</option>
-        <option value="sla">SLA (Смола)</option>
-      </select>
-    </div>
-  </div>
+  <!-- Bootstrap CSS (deferred) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" media="print" onload="this.media='all'">
+  
+  <!-- Font Awesome only load used icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/solid.min.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css" media="print" onload="this.media='all'">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
-  <!-- Equipment Settings (Depreciation & Rent) -->
-  <div class="section-group">
-    <h3>🔧 Оборудование (Амортизация и Аренда)</h3>
-    <div class="input-group inline">
-      <label for="monthlyRent">Ежемесячная аренда:</label>
-      <div class="input-with-unit">
-        <input type="number" id="monthlyRent" value="15000" step="1">
-        <span class="unit">₽/мес</span>
-      </div>
-    </div>
-    
-    <h4>📋 Список оборудования</h4>
-    <div id="equipmentList" style="margin-bottom: 15px;"></div>
-    
-    <div class="button-group">
-      <button onclick="showAddEquipmentForm()" class="save-btn">➕ Добавить станок</button>
-    </div>
-    
-    <div id="equipmentForm" style="display: none; margin-top: 15px; padding: 15px; background: #1e293b; border-radius: 8px;">
-      <h4>🔧 Добавить/редактировать станок</h4>
-      <input type="hidden" id="editingEquipmentId">
-      <div class="input-group inline">
-        <label for="equipmentName">Название:</label>
-        <input type="text" id="equipmentName" placeholder="Prusa i3 MK3">
-      </div>
-      <div class="input-group inline">
-        <label for="equipmentCost">Стоимость:</label>
-        <div class="input-with-unit">
-          <input type="number" id="equipmentCost" value="50000" step="1">
-          <span class="unit">₽</span>
+  <!-- Non-critical CSS with async loading -->
+  <link rel="stylesheet" href="assets/css/main.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="assets/css/calculator.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="assets/css/blog.css" media="print" onload="this.media='all'">
+  
+  <noscript>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/solid.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/calculator.css">
+    <link rel="stylesheet" href="assets/css/blog.css">
+  </noscript>
+</head>
+<body>
+  <div id="particles-js"></div>
+  <div class="calculator-wrapper container-fluid">
+    <div class="row justify-content-center align-items-start">
+      <div class="col-12">
+        <div class="calculator-box">
+          <h2>🖨️ 3D Print ERP Calculator</h2>
+          
+          <!-- Auth Section -->
+          <div class="section-group" id="authSection">
+            <h3>🔐 Авторизация</h3>
+            <div class="input-group">
+              <label for="authEmail">Email:</label>
+              <input type="email" id="authEmail" placeholder="your@email.com">
+            </div>
+            <div class="input-group">
+              <label for="authPassword">Пароль:</label>
+              <input type="password" id="authPassword" placeholder="••••••••">
+            </div>
+            <div class="button-group">
+              <button onclick="handleLogin(event)" class="calculate-btn">Войти</button>
+              <button onclick="handleRegister(event)" class="save-btn">Зарегистрироваться</button>
+            </div>
+          </div>
+
+          <!-- User Info -->
+          <div class="section-group" id="userInfo" style="display: none;">
+            <span></span>
+            <button onclick="handleLogout()" class="reset-btn">Выйти</button>
+          </div>
+
+          <!-- Calculator Section -->
+          <div id="calculatorSection" style="display: none;">
+          
+          <!-- Print Type Toggle -->
+          <div class="section-group">
+            <h3>Тип печати</h3>
+            <div class="input-group inline">
+              <label for="printType">Тип:</label>
+              <select id="printType" onchange="togglePrintType()">
+                <option value="fdm">FDM (Филамент)</option>
+                <option value="sla">SLA (Смола)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Equipment Settings (Depreciation & Rent) -->
+          <div class="section-group">
+            <h3>🔧 Оборудование (Амортизация и Аренда)</h3>
+            <div class="input-group inline">
+              <label for="monthlyRent">Ежемесячная аренда:</label>
+              <div class="input-with-unit">
+                <input type="number" id="monthlyRent" value="0" min="0">
+                <span class="unit">₽/мес</span>
+              </div>
+            </div>
+            <div class="input-group inline">
+              <label for="monthlyHours">Часы работы в месяц:</label>
+              <div class="input-with-unit">
+                <input type="number" id="monthlyHours" value="160" min="0">
+                <span class="unit">час</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Equipment Management -->
+          <div class="section-group">
+            <h3>🔧 Управление оборудованием</h3>
+            <div id="equipmentList" style="margin-bottom: 15px;"></div>
+            <button onclick="showAddEquipmentForm()" class="calculate-btn">➕ Добавить станок</button>
+            
+            <div id="equipmentForm" style="display: none; margin-top: 15px; padding: 15px; background: #2d3748; border-radius: 8px;">
+              <h4>Добавить станок</h4>
+              <input type="hidden" id="editingEquipmentId">
+              <div class="input-group">
+                <label for="equipmentName">Название:</label>
+                <input type="text" id="equipmentName" placeholder="Например: Prusa i3 MK3">
+              </div>
+              <div class="input-group">
+                <label for="equipmentCost">Стоимость (₽):</label>
+                <input type="number" id="equipmentCost" placeholder="50000">
+              </div>
+              <div class="input-group">
+                <label for="equipmentLifespan">Ресурс (часов):</label>
+                <input type="number" id="equipmentLifespan" placeholder="10000">
+              </div>
+              <div class="input-group">
+                <label for="equipmentPower">Мощность (Вт):</label>
+                <input type="number" id="equipmentPower" placeholder="300">
+              </div>
+              <div class="input-group">
+                <label for="equipmentSpeed">Скорость (мм/с):</label>
+                <input type="number" id="equipmentSpeed" placeholder="60">
+              </div>
+              <div class="button-group">
+                <button onclick="saveEquipment()" class="save-btn">Сохранить</button>
+                <button onclick="hideEquipmentForm()" class="reset-btn">Отмена</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Consumables Management -->
+          <div class="section-group">
+            <h3>📦 Управление расходниками</h3>
+            <div id="consumablesList" style="margin-bottom: 15px;"></div>
+            <button onclick="showAddConsumableForm()" class="calculate-btn">➕ Добавить расходник</button>
+            
+            <div id="consumableForm" style="display: none; margin-top: 15px; padding: 15px; background: #2d3748; border-radius: 8px;">
+              <h4>Добавить расходник</h4>
+              <input type="hidden" id="editingConsumableId">
+              <div class="input-group">
+                <label for="consumableName">Название:</label>
+                <input type="text" id="consumableName" placeholder="Например: Изопропиловый спирт">
+              </div>
+              <div class="input-group">
+                <label for="consumableCost">Стоимость (₽):</label>
+                <input type="number" id="consumableCost" placeholder="500">
+              </div>
+              <div class="input-group">
+                <label for="consumableUnit">Единица измерения:</label>
+                <select id="consumableUnit">
+                  <option value="л">Литры (л)</option>
+                  <option value="кг">Килограммы (кг)</option>
+                  <option value="шт">Штуки (шт)</option>
+                  <option value="мл">Миллилитры (мл)</option>
+                  <option value="г">Граммы (г)</option>
+                </select>
+              </div>
+              <div class="button-group">
+                <button onclick="saveConsumable()" class="save-btn">Сохранить</button>
+                <button onclick="hideConsumableForm()" class="reset-btn">Отмена</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Projects Management -->
+          <div class="section-group">
+            <h3>📁 Управление проектами</h3>
+            <div id="projectsList" style="margin-bottom: 15px;"></div>
+            <button onclick="showAddProjectForm()" class="calculate-btn">➕ Создать проект</button>
+            <button onclick="saveAsProject()" class="save-btn">💾 Сохранить как проект</button>
+            
+            <div id="projectForm" style="display: none; margin-top: 15px; padding: 15px; background: #2d3748; border-radius: 8px;">
+              <h4>Создать проект</h4>
+              <input type="hidden" id="editingProjectId">
+              <div class="input-group">
+                <label for="projectName">Название проекта:</label>
+                <input type="text" id="projectName" placeholder="Например: Проект клиента Иванов">
+              </div>
+              <div class="button-group">
+                <button onclick="saveProject()" class="save-btn">Сохранить</button>
+                <button onclick="hideProjectForm()" class="reset-btn">Отмена</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Complexity Factor -->
+          <div class="section-group">
+            <h3>🎯 Сложность детали</h3>
+            <div class="input-group inline">
+              <label for="complexity">Коэффициент сложности:</label>
+              <select id="complexity">
+                <option value="1.0">Простая (1.0x)</option>
+                <option value="1.2">Средняя (1.2x)</option>
+                <option value="1.5">Сложная (1.5x)</option>
+                <option value="2.0">Очень сложная (2.0x)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Results Section -->
+          <div class="section-group" id="results">
+            <h3>💰 Результаты</h3>
+            <div class="result-item">
+              <span class="result-label">Стоимость материала:</span>
+              <span class="result-value" id="materialCost">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Амортизация:</span>
+              <span class="result-value" id="depreciationCost">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Аренда:</span>
+              <span class="result-value" id="rentCost">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Электричество:</span>
+              <span class="result-value" id="powerCost">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Работа:</span>
+              <span class="result-value" id="laborCostResult">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Риск брака:</span>
+              <span class="result-value" id="riskCost">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Сложность:</span>
+              <span class="result-value" id="complexityCost">₽0.00</span>
+            </div>
+            <div class="result-item total">
+              <span class="result-label">ИТОГО:</span>
+              <span class="result-value" id="totalCost">₽0.00</span>
+            </div>
+          </div>
+          </div>
         </div>
       </div>
-      <div class="input-group inline">
-        <label for="equipmentLifespan">Ресурс:</label>
-        <div class="input-with-unit">
-          <input type="number" id="equipmentLifespan" value="20000" step="1">
-          <span class="unit">часов</span>
-        </div>
-      </div>
-      <div class="input-group inline">
-        <label for="equipmentPower">Мощность:</label>
-        <div class="input-with-unit">
-          <input type="number" id="equipmentPower" value="300" step="1">
-          <span class="unit">Вт</span>
-        </div>
-      </div>
-      <div class="input-group inline">
-        <label for="equipmentSpeed">Скорость печати:</label>
-        <div class="input-with-unit">
-          <input type="number" id="equipmentSpeed" value="60" step="1">
-          <span class="unit">мм/с</span>
-        </div>
-      </div>
-      <div class="button-group">
-        <button onclick="saveEquipment()" class="calculate-btn">Сохранить</button>
-        <button onclick="hideEquipmentForm()" class="reset-btn">Отмена</button>
-      </div>
     </div>
   </div>
 
-  <!-- Material Settings -->
-  <div class="section-group" id="materialSection">
-    <h3>🧵 Настройки материалов</h3>
-    <div class="input-group inline fdm-only">
-      <label for="filamentType">Тип филамента:</label>
-      <select id="filamentType" onchange="updateDefaultValues()">
-        <option value="pla">PLA</option>
-        <option value="abs">ABS</option>
-        <option value="petg">PETG</option>
-        <option value="tpu">TPU</option>
-        <option value="custom">Другой</option>
-      </select>
-    </div>
-    
-    <div class="input-group inline fdm-only">
-      <label for="filamentCost">Стоимость филамента (за кг):</label>
-      <div class="input-with-unit">
-        <input type="number" id="filamentCost" value="2000" step="0.01">
-        <span class="unit">₽/кг</span>
-      </div>
-    </div>
-
-    <div class="input-group inline fdm-only">
-      <label for="printWeight">Вес печати:</label>
-      <div class="input-with-unit">
-        <input type="number" id="printWeight" value="100" step="0.1">
-        <span class="unit">г</span>
-      </div>
-    </div>
-
-    <div class="input-group inline sla-only" style="display: none;">
-      <label for="resinCost">Стоимость смолы (за литр):</label>
-      <div class="input-with-unit">
-        <input type="number" id="resinCost" value="3000" step="0.01">
-        <span class="unit">₽/л</span>
-      </div>
-    </div>
-
-    <div class="input-group inline sla-only" style="display: none;">
-      <label for="printVolume">Объём печати:</label>
-      <div class="input-with-unit">
-        <input type="number" id="printVolume" value="50" step="0.1">
-        <span class="unit">мл</span>
-      </div>
-    </div>
-
-    <div class="input-group inline sla-only" style="display: none;">
-      <label for="alcoholCost">Изопропиловый спирт (авто):</label>
-      <div class="input-with-unit">
-        <input type="number" id="alcoholCost" value="0" step="0.01" readonly>
-        <span class="unit">₽</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Time & Power Settings -->
-  <div class="section-group">
-    <h3>⚡ Время и мощность</h3>
-    <div class="input-group inline">
-      <label for="printTime">Время печати:</label>
-      <div class="time-inputs">
-        <input type="number" id="printHours" value="3" min="0" placeholder="Часы">
-        <span>ч</span>
-        <input type="number" id="printMinutes" value="0" min="0" max="59" placeholder="Минуты">
-        <span>мин</span>
-      </div>
-    </div>
-
-    <div class="input-group inline">
-      <label for="electricityCost">Стоимость электричества:</label>
-      <div class="input-with-unit">
-        <input type="number" id="electricityCost" value="5.47" step="0.01">
-        <span class="unit">₽/кВт·ч</span>
-      </div>
-    </div>
-
-    <div class="input-group inline">
-      <label for="printerWattage">Мощность принтера:</label>
-      <div class="input-with-unit">
-        <input type="number" id="printerWattage" value="300" step="1">
-        <span class="unit">Вт</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Work & Post-processing -->
-  <div class="section-group">
-    <h3>🔨 Работа и постобработка</h3>
-    <div class="input-group inline">
-      <label for="laborHourlyRate">Почасовая ставка:</label>
-      <div class="input-with-unit">
-        <input type="number" id="laborHourlyRate" value="500" step="1">
-        <span class="unit">₽/ч</span>
-      </div>
-    </div>
-    <div class="input-group inline">
-      <label for="postProcessingHours">Время постобработки:</label>
-      <div class="input-with-unit">
-        <input type="number" id="postProcessingHours" value="1" step="0.5" min="0">
-        <span class="unit">ч</span>
-      </div>
-    </div>
-    <div class="input-group inline">
-      <label for="dremelWearLevel">Уровень износа Dremel:</label>
-      <select id="dremelWearLevel">
-        <option value="light">Лёгкий (+50₽)</option>
-        <option value="medium">Средний (+150₽)</option>
-        <option value="heavy">Тяжёлый (+300₽)</option>
-      </select>
-    </div>
-    <div class="input-group inline">
-      <label for="dremelConsumables">Расходники Dremel:</label>
-      <div class="input-with-unit">
-        <input type="number" id="dremelConsumables" value="0" step="1">
-        <span class="unit">₽</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Painting Module -->
-  <div class="section-group">
-    <h3>🎨 Покраска (опционально)</h3>
-    
-    <h4>📋 Расходники для покраски</h4>
-    <div id="consumablesList" style="margin-bottom: 15px;"></div>
-    
-    <div class="button-group">
-      <button onclick="showAddConsumableForm()" class="save-btn">➕ Добавить расходник</button>
-    </div>
-    
-    <div id="consumableForm" style="display: none; margin-top: 15px; padding: 15px; background: #1e293b; border-radius: 8px;">
-      <h4>➕ Добавить расходник</h4>
-      <input type="hidden" id="editingConsumableId">
-      <div class="input-group inline">
-        <label for="consumableName">Название:</label>
-        <input type="text" id="consumableName" placeholder="Спирт изопропиловый">
-      </div>
-      <div class="input-group inline">
-        <label for="consumableCost">Стоимость:</label>
-        <div class="input-with-unit">
-          <input type="number" id="consumableCost" value="500" step="1">
-          <span class="unit">₽</span>
-        </div>
-      </div>
-      <div class="input-group inline">
-        <label for="consumableUnit">Единица:</label>
-        <select id="consumableUnit">
-          <option value="л">литры (л)</option>
-          <option value="кг">килограммы (кг)</option>
-          <option value="шт">штуки (шт)</option>
-          <option value="мл">миллилитры (мл)</option>
-          <option value="г">граммы (г)</option>
-        </select>
-      </div>
-      <div class="button-group">
-        <button onclick="saveConsumable()" class="calculate-btn">Сохранить</button>
-        <button onclick="hideConsumableForm()" class="reset-btn">Отмена</button>
-      </div>
-    </div>
-    
-    <div class="input-group inline">
-      <label for="paintingEnabled">Включить покраску:</label>
-      <input type="checkbox" id="paintingEnabled" onchange="togglePainting()">
-    </div>
-    <div id="paintingSection" style="display: none;">
-      <div class="input-group inline">
-        <label for="paintingTime">Время покраски:</label>
-        <div class="input-with-unit">
-          <input type="number" id="paintingTime" value="1" step="0.5" min="0">
-          <span class="unit">ч</span>
-        </div>
-      </div>
-      <div class="input-group inline">
-        <label for="compressorPower">Мощность компрессора:</label>
-        <div class="input-with-unit">
-          <input type="number" id="compressorPower" value="500" step="1">
-          <span class="unit">Вт</span>
-        </div>
-      </div>
-      <div class="input-group inline">
-        <label for="paintChemistry">Химия (красители, разделители):</label>
-        <div class="input-with-unit">
-          <input type="number" id="paintChemistry" value="50" step="1">
-          <span class="unit">₽</span>
-        </div>
-      </div>
-      <div class="input-group inline">
-        <label for="paintSize">Размер детали:</label>
-        <select id="paintSize" onchange="updatePaintCost()">
-          <option value="small">Маленький (+100₽)</option>
-          <option value="medium">Средний (+250₽)</option>
-          <option value="large">Большой (+500₽)</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <!-- Additional Costs -->
-  <div class="section-group">
-    <h3>📊 Дополнительные расходы</h3>
-    <div class="input-group inline">
-      <label for="failureRate">Процент брака:</label>
-      <div class="input-with-unit">
-        <input type="number" id="failureRate" value="10" min="0" max="100" step="1">
-        <span class="unit">%</span>
-      </div>
-    </div>
-    <div class="input-group inline">
-      <label for="complexity">Сложность детали:</label>
-      <select id="complexity">
-        <option value="1.0">Простая (1.0x)</option>
-        <option value="1.2">Средняя (1.2x)</option>
-        <option value="1.5">Сложная (1.5x)</option>
-        <option value="2.0">Очень сложная (2.0x)</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Projects Section -->
-  <div class="section-group">
-    <h3>📁 Проекты</h3>
-    <div id="projectsList" style="margin-bottom: 15px;"></div>
-    
-    <div class="button-group">
-      <button onclick="showAddProjectForm()" class="save-btn">➕ Создать проект</button>
-      <button onclick="saveAsProject()" class="save-btn">💾 Сохранить как проект</button>
-    </div>
-    
-    <div id="projectForm" style="display: none; margin-top: 15px; padding: 15px; background: #1e293b; border-radius: 8px;">
-      <h4>📁 Создать/редактировать проект</h4>
-      <input type="hidden" id="editingProjectId">
-      <div class="input-group inline">
-        <label for="projectName">Название проекта:</label>
-        <input type="text" id="projectName" placeholder="Проект 1">
-      </div>
-      <div class="button-group">
-        <button onclick="saveProject()" class="calculate-btn">Сохранить</button>
-        <button onclick="hideProjectForm()" class="reset-btn">Отмена</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="button-group">
-    <button onclick="calculateCost()" class="calculate-btn">Рассчитать стоимость</button>
-    <button onclick="saveSettings()" class="save-btn">💾 Сохранить настройки</button>
-    <button onclick="resetForm()" class="reset-btn">Сброс</button>
-  </div>
-
-  <div class="results" id="results">
-    <h3>💰 Расчёт стоимости</h3>
-    <div class="cost-grid">
-      <div class="cost-item">
-        <label>Материал:</label>
-        <span id="materialCost">₽0.00</span>
-      </div>
-      <div class="cost-item">
-        <label>Амортизация оборудования:</label>
-        <span id="depreciationCost">₽0.00</span>
-      </div>
-      <div class="cost-item">
-        <label>Аренда:</label>
-        <span id="rentCost">₽0.00</span>
-      </div>
-      <div class="cost-item">
-        <label>Электричество:</label>
-        <span id="powerCost">₽0.00</span>
-      </div>
-      <div class="cost-item">
-        <label>Работа и постобработка:</label>
-        <span id="laborCostResult">₽0.00</span>
-      </div>
-      <div class="cost-item">
-        <label>Износ Dremel:</label>
-        <span id="dremelWearCost">₽0.00</span>
-      </div>
-      <div class="cost-item">
-        <label>Покраска:</label>
-        <span id="paintingCostResult">₽0.00</span>
-      </div>
-      <div class="cost-item">
-        <label>Риск брака:</label>
-        <span id="riskCost">₽0.00</span>
-      </div>
-    </div>
-    <div class="total-cost">
-      <label>Итого:</label>
-      <span id="totalCost">₽0.00</span>
-    </div>
-  </div>
-  </div>
-</div>
+  <!-- Load particles.js -->
+  <script src="//cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
+  
+  <!-- Load scripts without defer for onclick handlers -->
+  <script>
+    console.log('[DEBUG] Loading firebase.js...');
+    document.addEventListener('error', function(e) {
+      if (e.target.tagName === 'SCRIPT') {
+        console.error('[DEBUG] Script failed to load:', e.target.src);
+      }
+    }, true);
+  </script>
+  <script src="assets/js/firebase.js" onload="console.log('[DEBUG] firebase.js loaded')"></script>
+  <script src="assets/js/main.js" onload="console.log('[DEBUG] main.js loaded')"></script>
+  <script src="assets/js/calculator-erp.js" onload="console.log('[DEBUG] calculator-erp.js loaded')"></script>
+  <script>
+    console.log('[DEBUG] Checking if handleLogin is defined:', typeof handleLogin);
+  </script>
+  
+  <!-- Bootstrap JS - load only after page is ready -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const bootstrapScript = document.createElement('script');
+      bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';
+      bootstrapScript.defer = true;
+      document.body.appendChild(bootstrapScript);
+    });
+  </script>
+</body>
+</html>
