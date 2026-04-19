@@ -44,3 +44,29 @@ function renderOrdersList(orders) {
     container.appendChild(div);
   });
 }
+
+function renderPrintersList(printers) {
+  const container = document.getElementById('printersList');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (!printers || Object.keys(printers).length === 0) {
+    container.innerHTML = '<p style="color: #666;">Нет принтеров</p>';
+    return;
+  }
+  
+  Object.entries(printers).forEach(([id, item]) => {
+    const div = document.createElement('div');
+    div.className = 'station-card printer-card';
+    div.dataset.printerId = id;
+    div.innerHTML = `
+      <strong>${item.name}</strong>
+      <small>Статус: available</small>
+      <div class="drop-zone" data-station-type="printer" data-station-id="${id}">📥 Перетащите заказ</div>
+    `;
+    div.addEventListener('dragover', handleDragOver);
+    div.addEventListener('drop', handleDrop);
+    container.appendChild(div);
+  });
+}
