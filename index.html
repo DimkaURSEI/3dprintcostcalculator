@@ -120,159 +120,6 @@
 
     <!-- Main Content Grid -->
     <div class="main-grid">
-      <!-- Settings Sidebar -->
-      <aside id="settingsSidebar" class="settings-sidebar">
-        <div class="sidebar-header">
-          <h3>Настройки</h3>
-          <button class="close-btn" onclick="toggleSettings()"><i class="fas fa-times"></i></button>
-        </div>
-        
-        <div class="sidebar-content">
-          <!-- Equipment Section -->
-          <div class="settings-section">
-            <h4>🔧 Оборудование</h4>
-            <div id="equipmentList"></div>
-            <button onclick="showAddEquipmentForm()" class="add-btn">+ Добавить станок</button>
-            
-            <div id="equipmentForm" class="form-panel" style="display: none;">
-              <input type="hidden" id="editingEquipmentId">
-              <div class="input-group">
-                <label>Название:</label>
-                <input type="text" id="equipmentName" placeholder="Prusa i3 MK3">
-              </div>
-              <div class="input-group">
-                <label>Стоимость (₽):</label>
-                <input type="number" id="equipmentCost" placeholder="50000">
-              </div>
-              <div class="input-group">
-                <label>Ресурс (часов):</label>
-                <input type="number" id="equipmentLifespan" placeholder="10000">
-              </div>
-              <div class="input-group">
-                <label>Мощность (Вт):</label>
-                <input type="number" id="equipmentPower" placeholder="300">
-              </div>
-              <div class="input-group">
-                <label>Скорость (мм/с):</label>
-                <input type="number" id="equipmentSpeed" placeholder="60">
-              </div>
-              <div class="button-group">
-                <button onclick="saveEquipment()" class="primary-btn">Сохранить</button>
-                <button onclick="hideEquipmentForm()" class="secondary-btn">Отмена</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Consumables Section -->
-          <div class="settings-section">
-            <h4>📦 Материалы и расходники</h4>
-            <div id="consumablesList"></div>
-            <button onclick="showAddConsumableForm()" class="add-btn">+ Добавить материал</button>
-            
-            <div id="consumableForm" class="form-panel" style="display: none;">
-              <input type="hidden" id="editingConsumableId">
-              <div class="input-group">
-                <label>Название:</label>
-                <input type="text" id="consumableName" placeholder="PLA, ABS, Изопропиловый спирт">
-              </div>
-              <div class="input-group">
-                <label>Стоимость (₽):</label>
-                <input type="number" id="consumableCost" placeholder="500">
-              </div>
-              <div class="input-group">
-                <label>Единица:</label>
-                <select id="consumableUnit">
-                  <option value="кг">Килограммы (филамент)</option>
-                  <option value="л">Литры (смола, спирт)</option>
-                  <option value="шт">Штуки</option>
-                  <option value="мл">Миллилитры</option>
-                  <option value="г">Граммы</option>
-                </select>
-              </div>
-              <div class="button-group">
-                <button onclick="saveConsumable()" class="primary-btn">Сохранить</button>
-                <button onclick="hideConsumableForm()" class="secondary-btn">Отмена</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tariffs Section -->
-          <div class="settings-section">
-            <h4>💰 Тарифы</h4>
-            <div class="input-group">
-              <label>Ежемесячная аренда (₽):</label>
-              <input type="number" id="monthlyRent" value="15000">
-            </div>
-            <div class="input-group">
-              <label>Часы работы/мес:</label>
-              <input type="number" id="monthlyHours" value="160">
-            </div>
-            <div class="input-group">
-              <label>Электричество (₽/кВт⋅ч):</label>
-              <input type="number" id="electricityCost" value="5.47">
-            </div>
-            <div class="input-group">
-              <label>Ставка труда (₽/час):</label>
-              <input type="number" id="laborHourlyRate" value="500">
-            </div>
-            <div class="input-group">
-              <label>Ставка труда покраски (₽/час):</label>
-              <input type="number" id="paintingLaborRate" value="600">
-            </div>
-          </div>
-
-          <!-- Post-processing Section -->
-          <div class="settings-section">
-            <h4>🔧 Постобработка</h4>
-
-            <table class="post-processing-table">
-              <thead>
-                <tr>
-                  <th>Уровень</th>
-                  <th>Заточка кругов (₽)</th>
-                  <th>Абразивные круги (₽)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Лёгкий</td>
-                  <td><input type="number" id="sharpeningLight" value="50"></td>
-                  <td><input type="number" id="abrasivesLight" value="30"></td>
-                </tr>
-                <tr>
-                  <td>Средний</td>
-                  <td><input type="number" id="sharpeningMedium" value="150"></td>
-                  <td><input type="number" id="abrasivesMedium" value="80"></td>
-                </tr>
-                <tr>
-                  <td>Сильный</td>
-                  <td><input type="number" id="sharpeningHeavy" value="300"></td>
-                  <td><input type="number" id="abrasivesHeavy" value="150"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Projects Section -->
-          <div class="settings-section">
-            <h4>📁 Проекты</h4>
-            <div id="projectsList"></div>
-            <button onclick="showAddProjectForm()" class="add-btn">+ Создать проект</button>
-            
-            <div id="projectForm" class="form-panel" style="display: none;">
-              <input type="hidden" id="editingProjectId">
-              <div class="input-group">
-                <label>Название:</label>
-                <input type="text" id="projectName" placeholder="Проект клиента Иванов">
-              </div>
-              <div class="button-group">
-                <button onclick="saveProject()" class="primary-btn">Сохранить</button>
-                <button onclick="hideProjectForm()" class="secondary-btn">Отмена</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </aside>
 
       <!-- Main Working Area -->
       <main class="working-area">
@@ -521,8 +368,150 @@
         <button onclick="handleLogout()" class="icon-btn"><i class="fas fa-sign-out-alt"></i></button>
       </div>
     </header>
-    <div id="settingsContent">
-      <!-- Settings content will be moved here in Task 2 -->
+    <div id="settingsContent" class="settings-content">
+      <!-- Equipment Section -->
+      <div class="settings-section">
+        <h4>🔧 Оборудование</h4>
+        <div id="equipmentList"></div>
+        <button onclick="showAddEquipmentForm()" class="add-btn">+ Добавить станок</button>
+        
+        <div id="equipmentForm" class="form-panel" style="display: none;">
+          <input type="hidden" id="editingEquipmentId">
+          <div class="input-group">
+            <label>Название:</label>
+            <input type="text" id="equipmentName" placeholder="Prusa i3 MK3">
+          </div>
+          <div class="input-group">
+            <label>Стоимость (₽):</label>
+            <input type="number" id="equipmentCost" placeholder="50000">
+          </div>
+          <div class="input-group">
+            <label>Ресурс (часов):</label>
+            <input type="number" id="equipmentLifespan" placeholder="10000">
+          </div>
+          <div class="input-group">
+            <label>Мощность (Вт):</label>
+            <input type="number" id="equipmentPower" placeholder="300">
+          </div>
+          <div class="input-group">
+            <label>Скорость (мм/с):</label>
+            <input type="number" id="equipmentSpeed" placeholder="60">
+          </div>
+          <div class="button-group">
+            <button onclick="saveEquipment()" class="primary-btn">Сохранить</button>
+            <button onclick="hideEquipmentForm()" class="secondary-btn">Отмена</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Consumables Section -->
+      <div class="settings-section">
+        <h4>📦 Материалы и расходники</h4>
+        <div id="consumablesList"></div>
+        <button onclick="showAddConsumableForm()" class="add-btn">+ Добавить материал</button>
+        
+        <div id="consumableForm" class="form-panel" style="display: none;">
+          <input type="hidden" id="editingConsumableId">
+          <div class="input-group">
+            <label>Название:</label>
+            <input type="text" id="consumableName" placeholder="PLA, ABS, Изопропиловый спирт">
+          </div>
+          <div class="input-group">
+            <label>Стоимость (₽):</label>
+            <input type="number" id="consumableCost" placeholder="500">
+          </div>
+          <div class="input-group">
+            <label>Единица:</label>
+            <select id="consumableUnit">
+              <option value="кг">Килограммы (филамент)</option>
+              <option value="л">Литры (смола, спирт)</option>
+              <option value="шт">Штуки</option>
+              <option value="мл">Миллилитры</option>
+              <option value="г">Граммы</option>
+            </select>
+          </div>
+          <div class="button-group">
+            <button onclick="saveConsumable()" class="primary-btn">Сохранить</button>
+            <button onclick="hideConsumableForm()" class="secondary-btn">Отмена</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tariffs Section -->
+      <div class="settings-section">
+        <h4>💰 Тарифы</h4>
+        <div class="input-group">
+          <label>Ежемесячная аренда (₽):</label>
+          <input type="number" id="monthlyRent" value="15000">
+        </div>
+        <div class="input-group">
+          <label>Часы работы/мес:</label>
+          <input type="number" id="monthlyHours" value="160">
+        </div>
+        <div class="input-group">
+          <label>Электричество (₽/кВт⋅ч):</label>
+          <input type="number" id="electricityCost" value="5.47">
+        </div>
+        <div class="input-group">
+          <label>Ставка труда (₽/час):</label>
+          <input type="number" id="laborHourlyRate" value="500">
+        </div>
+        <div class="input-group">
+          <label>Ставка труда покраски (₽/час):</label>
+          <input type="number" id="paintingLaborRate" value="600">
+        </div>
+      </div>
+
+      <!-- Post-processing Section -->
+      <div class="settings-section">
+        <h4>🔧 Постобработка</h4>
+
+        <table class="post-processing-table">
+          <thead>
+            <tr>
+              <th>Уровень</th>
+              <th>Заточка кругов (₽)</th>
+              <th>Абразивные круги (₽)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Лёгкий</td>
+              <td><input type="number" id="sharpeningLight" value="50"></td>
+              <td><input type="number" id="abrasivesLight" value="30"></td>
+            </tr>
+            <tr>
+              <td>Средний</td>
+              <td><input type="number" id="sharpeningMedium" value="150"></td>
+              <td><input type="number" id="abrasivesMedium" value="80"></td>
+            </tr>
+            <tr>
+              <td>Сильный</td>
+              <td><input type="number" id="sharpeningHeavy" value="300"></td>
+              <td><input type="number" id="abrasivesHeavy" value="150"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Projects Section -->
+      <div class="settings-section">
+        <h4>📁 Проекты</h4>
+        <div id="projectsList"></div>
+        <button onclick="showAddProjectForm()" class="add-btn">+ Создать проект</button>
+        
+        <div id="projectForm" class="form-panel" style="display: none;">
+          <input type="hidden" id="editingProjectId">
+          <div class="input-group">
+            <label>Название:</label>
+            <input type="text" id="projectName" placeholder="Проект клиента Иванов">
+          </div>
+          <div class="button-group">
+            <button onclick="saveProject()" class="primary-btn">Сохранить</button>
+            <button onclick="hideProjectForm()" class="secondary-btn">Отмена</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -531,9 +520,6 @@
     <header class="app-header">
       <div class="header-left">
         <h1>ERP Планирование</h1>
-        <button onclick="populateTestData()" style="margin-left: 16px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
-          📊 Заполнить тестовые данные
-        </button>
       </div>
       <div class="header-right">
         <span id="userInfo"></span>

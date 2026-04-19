@@ -1085,28 +1085,19 @@ function updateDefaultValues() {
     calculateCost();
 }
 
-// Tab switching for ERP
+// Tab switching
 window.switchTab = function(tabName) {
-    const calculatorTab = document.getElementById('mainApp');
-    const erpTab = document.getElementById('erpTab');
-    const navItems = document.querySelectorAll('.bottom-nav .nav-item');
-
-    navItems.forEach(item => item.classList.remove('active'));
-
-    if (tabName === 'calculator') {
-        calculatorTab.style.display = 'flex';
-        erpTab.style.display = 'none';
-        const calculatorNavItem = document.querySelector('.bottom-nav [data-tab="calculator"]');
-        if (calculatorNavItem) calculatorNavItem.classList.add('active');
-    } else {
-        calculatorTab.style.display = 'none';
-        erpTab.style.display = 'block';
-        const erpNavItem = document.querySelector('.bottom-nav [data-tab="erp"]');
-        if (erpNavItem) erpNavItem.classList.add('active');
-        if (typeof loadERPData === 'function') {
-            loadERPData();
-        }
-    }
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.tab === tabName);
+  });
+  
+  document.getElementById('calculatorTab').style.display = tabName === 'calculator' ? 'block' : 'none';
+  document.getElementById('settingsTab').style.display = tabName === 'settings' ? 'block' : 'none';
+  document.getElementById('erpTab').style.display = tabName === 'erp' ? 'block' : 'none';
+  
+  if (tabName === 'erp' && typeof loadERPData === 'function') {
+    loadERPData();
+  }
 };
 
 // Populate test data for ERP
