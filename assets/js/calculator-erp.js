@@ -993,11 +993,13 @@ function updateLayout() {
     const vh = window.innerHeight;
     const calculator = document.querySelector('.calculator-box');
     
-    if (vh < 600) {
-        // For very small screens (like landscape on phone)
-        calculator.classList.add('compact-view');
-    } else {
-        calculator.classList.remove('compact-view');
+    if (calculator) {
+        if (vh < 600) {
+            // For very small screens (like landscape on phone)
+            calculator.classList.add('compact-view');
+        } else {
+            calculator.classList.remove('compact-view');
+        }
     }
 }
 
@@ -1019,7 +1021,7 @@ function updateDefaultValues() {
 }
 
 // Tab switching for ERP
-function switchTab(tabName) {
+window.switchTab = function(tabName) {
     const calculatorTab = document.getElementById('mainApp');
     const erpTab = document.getElementById('erpTab');
     const navItems = document.querySelectorAll('.nav-item');
@@ -1029,16 +1031,18 @@ function switchTab(tabName) {
     if (tabName === 'calculator') {
         calculatorTab.style.display = 'flex';
         erpTab.style.display = 'none';
-        document.querySelector('[data-tab="calculator"]').classList.add('active');
+        const calculatorNavItem = document.querySelector('[data-tab="calculator"]');
+        if (calculatorNavItem) calculatorNavItem.classList.add('active');
     } else {
         calculatorTab.style.display = 'none';
         erpTab.style.display = 'block';
-        document.querySelector('[data-tab="erp"]').classList.add('active');
+        const erpNavItem = document.querySelector('[data-tab="erp"]');
+        if (erpNavItem) erpNavItem.classList.add('active');
         if (typeof loadERPData === 'function') {
             loadERPData();
         }
     }
-}
+};
 
 function resetForm() {
     // Reset form to default values
