@@ -288,8 +288,8 @@
           <input type="hidden" id="materialPower">
           <input type="hidden" id="materialType">
 
-          <!-- FDM Parameters -->
-          <div class="fdm-section">
+          <!-- FDM Parameters (shown when no material selected or material type is FDM) -->
+          <div class="fdm-section" id="fdmSection">
             <div class="input-group">
               <label>Тип филамента (если не выбран материал):</label>
               <select id="filamentType" onchange="updateDefaultValues()">
@@ -306,12 +306,12 @@
             </div>
             <div class="input-group">
               <label>Вес детали (г):</label>
-              <input type="number" id="printWeight" value="100">
+              <input type="number" id="partWeight" value="100">
             </div>
           </div>
 
-          <!-- SLA Parameters -->
-          <div class="sla-section" style="display: none;">
+          <!-- SLA Parameters (shown when no material selected or material type is SLA) -->
+          <div class="sla-section" id="slaSection" style="display: none;">
             <div class="input-group">
               <label>Тип смолы (если не выбран материал):</label>
               <select id="resinType" onchange="updateDefaultValues()">
@@ -328,7 +328,7 @@
             </div>
             <div class="input-group">
               <label>Объём детали (мл):</label>
-              <input type="number" id="printVolume" value="50">
+              <input type="number" id="partVolume" value="50">
             </div>
           </div>
 

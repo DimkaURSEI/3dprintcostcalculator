@@ -1074,10 +1074,10 @@ function calculateCost() {
         // Material costs
         let materialCost = 0;
         if (printType === 'fdm') {
-            const partWeight = getValue('partWeight');
+            const partWeight = getValue('partWeight') || getValue('printWeight');
             materialCost = (materialCostPerUnit * partWeight) / 1000;
         } else {
-            const partVolume = getValue('partVolume');
+            const partVolume = getValue('partVolume') || getValue('printVolume');
             materialCost = (materialCostPerUnit * partVolume) / 1000;
             
             // Auto-calculate alcohol cost for SLA (approximately 10% of resin cost)

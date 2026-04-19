@@ -337,6 +337,9 @@ function updateMaterialDefaults() {
   const select = document.getElementById('materialSelect');
   const selectedOption = select.options[select.selectedIndex];
 
+  const fdmSection = document.getElementById('fdmSection');
+  const slaSection = document.getElementById('slaSection');
+
   if (selectedOption && selectedOption.value) {
     document.getElementById('materialCost').value = selectedOption.dataset.cost;
     document.getElementById('materialPower').value = selectedOption.dataset.power;
@@ -349,8 +352,22 @@ function updateMaterialDefaults() {
       togglePrintType();
     }
 
+    // Hide FDM/SLA sections when material is selected
+    if (fdmSection) fdmSection.style.display = 'none';
+    if (slaSection) slaSection.style.display = 'none';
+
     if (typeof calculateCost === 'function') {
       calculateCost();
+    }
+  } else {
+    // Show FDM/SLA sections when no material is selected
+    const printType = document.getElementById('printType').value;
+    if (printType === 'fdm') {
+      if (fdmSection) fdmSection.style.display = 'block';
+      if (slaSection) slaSection.style.display = 'none';
+    } else {
+      if (fdmSection) fdmSection.style.display = 'none';
+      if (slaSection) slaSection.style.display = 'block';
     }
   }
 }
