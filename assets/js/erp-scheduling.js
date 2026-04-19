@@ -350,12 +350,25 @@ async function handleDrop(e) {
       return;
     }
     
-    // Prompt for quantity
-    const quantity = prompt(`Сколько деталей "${part.name}" (доступно: ${part.quantity}) на этом станке?`, part.quantity);
+    // If quantity is 1, assign automatically without prompt
+    if (part.quantity === 1) {
+      await saveAssignment(orderId, partId, stationType, stationId, 1);
+      loadERPData();
+      alert(`Назначено: 1 деталь на ${stationType} ${stationId}`);
+      return;
+    }
+    
+    // Prompt for quantity with "all" option
+    const quantity = prompt(`Сколько деталей "${part.name}" (доступно: ${part.quantity}) на этом станке?\n\nВведите число или "все" для всех деталей:`, part.quantity);
     
     if (quantity === null) return; // User cancelled
     
-    const qty = parseInt(quantity);
+    let qty;
+    if (quantity.toLowerCase() === 'все' || quantity.toLowerCase() === 'all') {
+      qty = part.quantity;
+    } else {
+      qty = parseInt(quantity);
+    }
     
     if (isNaN(qty) || qty <= 0) {
       alert('Некорректное количество');
