@@ -1066,7 +1066,7 @@ function calculateCost() {
         const printTime = printHours + (printMinutes / 60);
         
         // Equipment depreciation
-        const depreciationCost = (equipmentCost / equipmentLifespan) * printTime;
+        const depreciationCost = equipmentLifespan > 0 ? (equipmentCost / equipmentLifespan) * printTime : 0;
         
         // Rent cost (hourly rate)
         const hoursPerMonth = 30 * 24;
@@ -1108,26 +1108,34 @@ function calculateCost() {
             paintingCostTotal = paintingPowerCost + paintingLaborCost + paintChemistry + paintSizeCost;
         }
         
-        // Calculate subtotal
+        // Get quantity
+        const quantity = getValue('quantity') || 1;
+
+        // Calculate subtotal before risk/complexity
         const subtotal = materialCost + depreciationCost + rentCost + powerCost + laborCostTotal + totalDremelCost + paintingCostTotal;
-        
-        // Risk cost
+
+        // Risk cost and complexity cost are per-item
         const failureRate = getValue('failureRate');
         const riskCost = subtotal * (failureRate / 100);
         const complexity = parseFloat(document.getElementById('complexity').value) || 1.0;
         const complexityCost = laborCostTotal * (complexity - 1);
-        const totalCost = subtotal + riskCost + complexityCost;
+
+        // Total cost per item
+        const costPerItem = subtotal + riskCost + complexityCost;
+
+        // Total cost for quantity
+        const totalCost = costPerItem * quantity;
         
         // Update results with animations
-        updateCostDisplay('materialCost', materialCost);
-        updateCostDisplay('depreciationCost', depreciationCost);
-        updateCostDisplay('rentCost', rentCost);
-        updateCostDisplay('powerCost', powerCost);
-        updateCostDisplay('laborCostResult', laborCostTotal);
-        updateCostDisplay('dremelWearCost', totalDremelCost);
-        updateCostDisplay('paintingCostResult', paintingCostTotal);
-        updateCostDisplay('riskCost', riskCost);
-        updateCostDisplay('totalCost', totalCost);
+        updateCostDisplay('materialCost', materialCost, quantity);
+        updateCostDisplay('depreciationCost', depreciationCost, quantity);
+        updateCostDisplay('rentCost', rentCost, quantity);
+        updateCostDisplay('powerCost', powerCost, quantity);
+        updateCostDisplay('laborCostResult', laborCostTotal, quantity);
+        updateCostDisplay('dremelWearCost', totalDremelCost, quantity);
+        updateCostDisplay('paintingCostResult', paintingCostTotal, quantity);
+        updateCostDisplay('riskCost', riskCost, quantity);
+        updateCostDisplay('totalCost', totalCost, quantity);
         
         // Scroll to results if they're not visible
         // Only on small screens and only if calculation was triggered by button
@@ -1150,19 +1158,20 @@ function calculateCost() {
     }
 }
 
-function updateCostDisplay(elementId, value) {
+function updateCostDisplay(elementId, value, quantity = 1) {
     const element = document.getElementById(elementId);
     if (!element) return;
-    
-    // Format with 2 decimal places and include ruble sign
-    const formattedValue = `₽${formatNumber(value)}`;
-    
+
+    const perItem = `₽${formatNumber(value)}`;
+    const total = quantity > 1 ? ` (₽${formatNumber(value * quantity)})` : '';
+    const formattedValue = perItem + total;
+
     // Only animate if the value has changed
     if (element.textContent !== formattedValue) {
         // Add animation class
         element.classList.add('update-animation');
         element.textContent = formattedValue;
-        
+
         // Remove animation class after animation completes
         setTimeout(() => {
             if (element) element.classList.remove('update-animation');

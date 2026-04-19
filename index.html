@@ -8,6 +8,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="format-detection" content="telephone=no">
 
+  <style>
+    /* Prevent layout jump while CSS loads */
+    body { opacity: 0; }
+    body.loaded { opacity: 1; transition: opacity 0.3s ease; }
+  </style>
+
   <!-- Preconnect to origins -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,274 +25,399 @@
   <meta name="description" content="ERP калькулятор для 3D печати с управлением проектами, оборудованием и расходниками">
 
   <!-- Font display strategy for webfonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   
-  <!-- Bootstrap CSS (deferred) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" media="print" onload="this.media='all'">
-  
-  <!-- Font Awesome only load used icons -->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/solid.min.css" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css" media="print" onload="this.media='all'">
   
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 
-  <!-- Non-critical CSS with async loading -->
-  <link rel="stylesheet" href="assets/css/main.css" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="assets/css/calculator.css" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="assets/css/blog.css" media="print" onload="this.media='all'">
+  <!-- Favicon fix -->
+  <link rel="icon" href="data:,">
+
+  <!-- Premium CSS -->
+  <link rel="stylesheet" href="assets/css/premium.css" media="print" onload="this.media='all'">
   
   <noscript>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/solid.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
-    <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/calculator.css">
-    <link rel="stylesheet" href="assets/css/blog.css">
+    <link rel="stylesheet" href="assets/css/premium.css">
   </noscript>
 </head>
 <body>
-  <div id="particles-js"></div>
-  <div class="calculator-wrapper container-fluid">
-    <div class="row justify-content-center align-items-start">
-      <div class="col-12">
-        <div class="calculator-box">
-          <h2>🖨️ 3D Print ERP Calculator</h2>
-          
-          <!-- Auth Section -->
-          <div class="section-group" id="authSection">
-            <h3>🔐 Авторизация</h3>
-            <div class="input-group">
-              <label for="authEmail">Email:</label>
-              <input type="email" id="authEmail" placeholder="your@email.com">
-            </div>
-            <div class="input-group">
-              <label for="authPassword">Пароль:</label>
-              <input type="password" id="authPassword" placeholder="••••••••">
-            </div>
-            <div class="button-group">
-              <button onclick="handleLogin(event)" class="calculate-btn">Войти</button>
-              <button onclick="handleRegister(event)" class="save-btn">Зарегистрироваться</button>
-            </div>
-          </div>
+  <!-- Auth Modal -->
+  <div id="authModal" class="modal-overlay">
+    <div class="modal-content">
+      <h2>🖨️ 3D Print ERP Calculator</h2>
+      <form onsubmit="handleLogin(event)">
+        <div class="input-group">
+          <label for="authEmail">Email:</label>
+          <input type="email" id="authEmail" placeholder="your@email.com" required>
+        </div>
+        <div class="input-group">
+          <label for="authPassword">Пароль:</label>
+          <input type="password" id="authPassword" placeholder="••••••••" required>
+        </div>
+        <div class="button-group">
+          <button type="submit" class="primary-btn">Войти</button>
+          <button type="button" onclick="handleRegister(event)" class="secondary-btn">Зарегистрироваться</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-          <!-- User Info -->
-          <div class="section-group" id="userInfo" style="display: none;">
-            <span></span>
-            <button onclick="handleLogout()" class="reset-btn">Выйти</button>
-          </div>
+  <!-- Main App -->
+  <div id="mainApp" class="app-container" style="display: none;">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <h1>3D Print ERP</h1>
+        <button class="settings-toggle" onclick="toggleSettings()">
+          <i class="fas fa-cog"></i>
+          <span>Настройки</span>
+        </button>
+      </div>
+      <div class="header-center">
+        <select id="printType" onchange="togglePrintType()">
+          <option value="fdm">FDM</option>
+          <option value="sla">SLA</option>
+        </select>
+        <select id="projectSelect">
+          <option value="">Выберите проект</option>
+        </select>
+      </div>
+      <div class="header-right">
+        <span id="userInfo"></span>
+        <button onclick="handleLogout()" class="icon-btn"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </header>
 
-          <!-- Calculator Section -->
-          <div id="calculatorSection" style="display: none;">
-          
-          <!-- Print Type Toggle -->
-          <div class="section-group">
-            <h3>Тип печати</h3>
-            <div class="input-group inline">
-              <label for="printType">Тип:</label>
-              <select id="printType" onchange="togglePrintType()">
-                <option value="fdm">FDM (Филамент)</option>
-                <option value="sla">SLA (Смола)</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Equipment Settings (Depreciation & Rent) -->
-          <div class="section-group">
-            <h3>🔧 Оборудование (Амортизация и Аренда)</h3>
-            <div class="input-group inline">
-              <label for="monthlyRent">Ежемесячная аренда:</label>
-              <div class="input-with-unit">
-                <input type="number" id="monthlyRent" value="0" min="0">
-                <span class="unit">₽/мес</span>
-              </div>
-            </div>
-            <div class="input-group inline">
-              <label for="monthlyHours">Часы работы в месяц:</label>
-              <div class="input-with-unit">
-                <input type="number" id="monthlyHours" value="160" min="0">
-                <span class="unit">час</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Equipment Management -->
-          <div class="section-group">
-            <h3>🔧 Управление оборудованием</h3>
-            <div id="equipmentList" style="margin-bottom: 15px;"></div>
-            <button onclick="showAddEquipmentForm()" class="calculate-btn">➕ Добавить станок</button>
+    <!-- Main Content Grid -->
+    <div class="main-grid">
+      <!-- Settings Sidebar -->
+      <aside id="settingsSidebar" class="settings-sidebar">
+        <div class="sidebar-header">
+          <h3>Настройки</h3>
+          <button class="close-btn" onclick="toggleSettings()"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div class="sidebar-content">
+          <!-- Equipment Section -->
+          <div class="settings-section">
+            <h4>🔧 Оборудование</h4>
+            <div id="equipmentList"></div>
+            <button onclick="showAddEquipmentForm()" class="add-btn">+ Добавить станок</button>
             
-            <div id="equipmentForm" style="display: none; margin-top: 15px; padding: 15px; background: #2d3748; border-radius: 8px;">
-              <h4>Добавить станок</h4>
+            <div id="equipmentForm" class="form-panel" style="display: none;">
               <input type="hidden" id="editingEquipmentId">
               <div class="input-group">
-                <label for="equipmentName">Название:</label>
-                <input type="text" id="equipmentName" placeholder="Например: Prusa i3 MK3">
+                <label>Название:</label>
+                <input type="text" id="equipmentName" placeholder="Prusa i3 MK3">
               </div>
               <div class="input-group">
-                <label for="equipmentCost">Стоимость (₽):</label>
+                <label>Стоимость (₽):</label>
                 <input type="number" id="equipmentCost" placeholder="50000">
               </div>
               <div class="input-group">
-                <label for="equipmentLifespan">Ресурс (часов):</label>
+                <label>Ресурс (часов):</label>
                 <input type="number" id="equipmentLifespan" placeholder="10000">
               </div>
               <div class="input-group">
-                <label for="equipmentPower">Мощность (Вт):</label>
+                <label>Мощность (Вт):</label>
                 <input type="number" id="equipmentPower" placeholder="300">
               </div>
               <div class="input-group">
-                <label for="equipmentSpeed">Скорость (мм/с):</label>
+                <label>Скорость (мм/с):</label>
                 <input type="number" id="equipmentSpeed" placeholder="60">
               </div>
               <div class="button-group">
-                <button onclick="saveEquipment()" class="save-btn">Сохранить</button>
-                <button onclick="hideEquipmentForm()" class="reset-btn">Отмена</button>
+                <button onclick="saveEquipment()" class="primary-btn">Сохранить</button>
+                <button onclick="hideEquipmentForm()" class="secondary-btn">Отмена</button>
               </div>
             </div>
           </div>
 
-          <!-- Consumables Management -->
-          <div class="section-group">
-            <h3>📦 Управление расходниками</h3>
-            <div id="consumablesList" style="margin-bottom: 15px;"></div>
-            <button onclick="showAddConsumableForm()" class="calculate-btn">➕ Добавить расходник</button>
+          <!-- Consumables Section -->
+          <div class="settings-section">
+            <h4>📦 Расходники</h4>
+            <div id="consumablesList"></div>
+            <button onclick="showAddConsumableForm()" class="add-btn">+ Добавить расходник</button>
             
-            <div id="consumableForm" style="display: none; margin-top: 15px; padding: 15px; background: #2d3748; border-radius: 8px;">
-              <h4>Добавить расходник</h4>
+            <div id="consumableForm" class="form-panel" style="display: none;">
               <input type="hidden" id="editingConsumableId">
               <div class="input-group">
-                <label for="consumableName">Название:</label>
-                <input type="text" id="consumableName" placeholder="Например: Изопропиловый спирт">
+                <label>Название:</label>
+                <input type="text" id="consumableName" placeholder="Изопропиловый спирт">
               </div>
               <div class="input-group">
-                <label for="consumableCost">Стоимость (₽):</label>
+                <label>Стоимость (₽):</label>
                 <input type="number" id="consumableCost" placeholder="500">
               </div>
               <div class="input-group">
-                <label for="consumableUnit">Единица измерения:</label>
+                <label>Единица:</label>
                 <select id="consumableUnit">
-                  <option value="л">Литры (л)</option>
-                  <option value="кг">Килограммы (кг)</option>
-                  <option value="шт">Штуки (шт)</option>
-                  <option value="мл">Миллилитры (мл)</option>
-                  <option value="г">Граммы (г)</option>
+                  <option value="л">Литры</option>
+                  <option value="кг">Килограммы</option>
+                  <option value="шт">Штуки</option>
+                  <option value="мл">Миллилитры</option>
+                  <option value="г">Граммы</option>
                 </select>
               </div>
               <div class="button-group">
-                <button onclick="saveConsumable()" class="save-btn">Сохранить</button>
-                <button onclick="hideConsumableForm()" class="reset-btn">Отмена</button>
+                <button onclick="saveConsumable()" class="primary-btn">Сохранить</button>
+                <button onclick="hideConsumableForm()" class="secondary-btn">Отмена</button>
               </div>
             </div>
           </div>
 
-          <!-- Projects Management -->
-          <div class="section-group">
-            <h3>📁 Управление проектами</h3>
-            <div id="projectsList" style="margin-bottom: 15px;"></div>
-            <button onclick="showAddProjectForm()" class="calculate-btn">➕ Создать проект</button>
-            <button onclick="saveAsProject()" class="save-btn">💾 Сохранить как проект</button>
+          <!-- Tariffs Section -->
+          <div class="settings-section">
+            <h4>💰 Тарифы</h4>
+            <div class="input-group">
+              <label>Ежемесячная аренда (₽):</label>
+              <input type="number" id="monthlyRent" value="15000">
+            </div>
+            <div class="input-group">
+              <label>Часы работы/мес:</label>
+              <input type="number" id="monthlyHours" value="160">
+            </div>
+            <div class="input-group">
+              <label>Электричество (₽/кВт⋅ч):</label>
+              <input type="number" id="electricityCost" value="5.47">
+            </div>
+            <div class="input-group">
+              <label>Ставка труда (₽/час):</label>
+              <input type="number" id="laborHourlyRate" value="500">
+            </div>
+          </div>
+
+          <!-- Projects Section -->
+          <div class="settings-section">
+            <h4>📁 Проекты</h4>
+            <div id="projectsList"></div>
+            <button onclick="showAddProjectForm()" class="add-btn">+ Создать проект</button>
             
-            <div id="projectForm" style="display: none; margin-top: 15px; padding: 15px; background: #2d3748; border-radius: 8px;">
-              <h4>Создать проект</h4>
+            <div id="projectForm" class="form-panel" style="display: none;">
               <input type="hidden" id="editingProjectId">
               <div class="input-group">
-                <label for="projectName">Название проекта:</label>
-                <input type="text" id="projectName" placeholder="Например: Проект клиента Иванов">
+                <label>Название:</label>
+                <input type="text" id="projectName" placeholder="Проект клиента Иванов">
               </div>
               <div class="button-group">
-                <button onclick="saveProject()" class="save-btn">Сохранить</button>
-                <button onclick="hideProjectForm()" class="reset-btn">Отмена</button>
+                <button onclick="saveProject()" class="primary-btn">Сохранить</button>
+                <button onclick="hideProjectForm()" class="secondary-btn">Отмена</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Working Area -->
+      <main class="working-area">
+        <!-- Part Parameters -->
+        <section class="card">
+          <h2>📐 Параметры детали</h2>
+
+          <div class="input-group">
+            <label for="quantity">Количество деталей:</label>
+            <input type="number" id="quantity" value="1" min="1">
+          </div>
+
+          <!-- FDM Parameters -->
+          <div class="fdm-section">
+            <div class="input-group">
+              <label>Тип филамента:</label>
+              <select id="filamentType" onchange="updateDefaultValues()">
+                <option value="pla">PLA</option>
+                <option value="abs">ABS</option>
+                <option value="petg">PETG</option>
+                <option value="tpu">TPU</option>
+                <option value="custom">Другой</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Стоимость филамента (₽/кг):</label>
+              <input type="number" id="filamentCost" value="2000">
+            </div>
+            <div class="input-group">
+              <label>Вес печати (г):</label>
+              <input type="number" id="printWeight" value="100">
+            </div>
+          </div>
+
+          <!-- SLA Parameters -->
+          <div class="sla-section" style="display: none;">
+            <div class="input-group">
+              <label>Стоимость смолы (₽/л):</label>
+              <input type="number" id="resinCost" value="3000">
+            </div>
+            <div class="input-group">
+              <label>Объём печати (мл):</label>
+              <input type="number" id="printVolume" value="50">
+            </div>
+          </div>
+
+          <!-- Time Parameters -->
+          <div class="time-inputs">
+            <div class="input-group">
+              <label>Время печати:</label>
+              <div class="time-row">
+                <input type="number" id="printHours" value="3" min="0" placeholder="ч">
+                <span>ч</span>
+                <input type="number" id="printMinutes" value="0" min="0" max="59" placeholder="мин">
+                <span>мин</span>
               </div>
             </div>
           </div>
 
-          <!-- Complexity Factor -->
-          <div class="section-group">
-            <h3>🎯 Сложность детали</h3>
-            <div class="input-group inline">
-              <label for="complexity">Коэффициент сложности:</label>
-              <select id="complexity">
-                <option value="1.0">Простая (1.0x)</option>
-                <option value="1.2">Средняя (1.2x)</option>
-                <option value="1.5">Сложная (1.5x)</option>
-                <option value="2.0">Очень сложная (2.0x)</option>
+          <!-- Complexity -->
+          <div class="input-group">
+            <label>Сложность детали:</label>
+            <select id="complexity">
+              <option value="1.0">Простая (1.0x)</option>
+              <option value="1.2">Средняя (1.2x)</option>
+              <option value="1.5">Сложная (1.5x)</option>
+              <option value="2.0">Очень сложная (2.0x)</option>
+            </select>
+          </div>
+
+          <!-- Post-processing -->
+          <div class="input-group">
+            <label>Постобработка (часы):</label>
+            <input type="number" id="postProcessingHours" value="1">
+          </div>
+
+          <!-- Dremel -->
+          <div class="input-group">
+            <label>Износ Dremel:</label>
+            <select id="dremelWearLevel">
+              <option value="light">Лёгкий</option>
+              <option value="medium">Средний</option>
+              <option value="heavy">Сильный</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Расходники Dremel (₽):</label>
+            <input type="number" id="dremelConsumables" value="0">
+          </div>
+
+          <!-- Painting -->
+          <div class="checkbox-group">
+            <label>
+              <input type="checkbox" id="paintingEnabled" onchange="togglePainting()">
+              Покраска
+            </label>
+          </div>
+          <div id="paintingSection" style="display: none;">
+            <div class="input-group">
+              <label>Время покраски (часы):</label>
+              <input type="number" id="paintingTime" value="1">
+            </div>
+            <div class="input-group">
+              <label>Мощность компрессора (Вт):</label>
+              <input type="number" id="compressorPower" value="500">
+            </div>
+            <div class="input-group">
+              <label>Химия (₽):</label>
+              <input type="number" id="paintChemistry" value="50">
+            </div>
+            <div class="input-group">
+              <label>Размер детали:</label>
+              <select id="paintSize">
+                <option value="small">Маленькая</option>
+                <option value="medium">Средняя</option>
+                <option value="large">Большая</option>
               </select>
             </div>
           </div>
 
-          <!-- Results Section -->
-          <div class="section-group" id="results">
-            <h3>💰 Результаты</h3>
-            <div class="result-item">
-              <span class="result-label">Стоимость материала:</span>
-              <span class="result-value" id="materialCost">₽0.00</span>
-            </div>
-            <div class="result-item">
-              <span class="result-label">Амортизация:</span>
-              <span class="result-value" id="depreciationCost">₽0.00</span>
-            </div>
-            <div class="result-item">
-              <span class="result-label">Аренда:</span>
-              <span class="result-value" id="rentCost">₽0.00</span>
-            </div>
-            <div class="result-item">
-              <span class="result-label">Электричество:</span>
-              <span class="result-value" id="powerCost">₽0.00</span>
-            </div>
-            <div class="result-item">
-              <span class="result-label">Работа:</span>
-              <span class="result-value" id="laborCostResult">₽0.00</span>
-            </div>
-            <div class="result-item">
-              <span class="result-label">Риск брака:</span>
-              <span class="result-value" id="riskCost">₽0.00</span>
-            </div>
-            <div class="result-item">
-              <span class="result-label">Сложность:</span>
-              <span class="result-value" id="complexityCost">₽0.00</span>
-            </div>
-            <div class="result-item total">
-              <span class="result-label">ИТОГО:</span>
-              <span class="result-value" id="totalCost">₽0.00</span>
-            </div>
+          <!-- Risk -->
+          <div class="input-group">
+            <label>Риск брака (%):</label>
+            <input type="number" id="failureRate" value="10">
           </div>
-          </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <div class="action-bar">
+          <button onclick="calculateCost()" class="primary-btn large">Рассчитать</button>
+          <button onclick="saveAsProject()" class="secondary-btn large">💾 Сохранить как проект</button>
+          <button onclick="resetForm()" class="reset-btn large">🔄 Сбросить</button>
         </div>
+      </main>
+
+      <!-- Sticky Results Panel -->
+      <aside class="results-panel">
+        <h3>💰 Результаты</h3>
+        <div class="result-item">
+          <span class="label">Материал</span>
+          <span class="value" id="materialCost">₽0.00</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Амортизация</span>
+          <span class="value" id="depreciationCost">₽0.00</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Аренда</span>
+          <span class="value" id="rentCost">₽0.00</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Электричество</span>
+          <span class="value" id="powerCost">₽0.00</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Работа</span>
+          <span class="value" id="laborCostResult">₽0.00</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Постобработка</span>
+          <span class="value" id="dremelWearCost">₽0.00</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Покраска</span>
+          <span class="value" id="paintingCostResult">₽0.00</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Риск брака</span>
+          <span class="value" id="riskCost">₽0.00</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Сложность</span>
+          <span class="value" id="complexityCost">₽0.00</span>
+        </div>
+        <div class="result-item total">
+          <span class="label">ИТОГО</span>
+          <span class="value" id="totalCost">₽0.00</span>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Mobile Settings Drawer -->
+  <div id="mobileSettingsDrawer" class="mobile-drawer">
+    <div class="drawer-overlay" onclick="toggleSettings()"></div>
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <h3>Настройки</h3>
+        <button class="close-btn" onclick="toggleSettings()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="drawer-body">
+        <!-- Mobile settings content will be cloned here -->
       </div>
     </div>
   </div>
 
-  <!-- Load particles.js -->
-  <script src="//cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
+  <!-- Scripts -->
+  <script src="assets/js/firebase.js"></script>
+  <script src="assets/js/calculator-erp.js"></script>
+  <script src="assets/js/premium.js"></script>
   
-  <!-- Load scripts without defer for onclick handlers -->
   <script>
-    console.log('[DEBUG] Loading firebase.js...');
-    document.addEventListener('error', function(e) {
-      if (e.target.tagName === 'SCRIPT') {
-        console.error('[DEBUG] Script failed to load:', e.target.src);
-      }
-    }, true);
-  </script>
-  <script src="assets/js/firebase.js" onload="console.log('[DEBUG] firebase.js loaded')"></script>
-  <script src="assets/js/main.js" onload="console.log('[DEBUG] main.js loaded')"></script>
-  <script src="assets/js/calculator-erp.js" onload="console.log('[DEBUG] calculator-erp.js loaded')"></script>
-  <script>
-    console.log('[DEBUG] Checking if handleLogin is defined:', typeof handleLogin);
-  </script>
-  
-  <!-- Bootstrap JS - load only after page is ready -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const bootstrapScript = document.createElement('script');
-      bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';
-      bootstrapScript.defer = true;
-      document.body.appendChild(bootstrapScript);
+    // Add loaded class after CSS loads
+    window.addEventListener('load', function() {
+      document.body.classList.add('loaded');
     });
   </script>
 </body>
