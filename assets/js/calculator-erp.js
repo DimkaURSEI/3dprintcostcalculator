@@ -43,7 +43,7 @@ async function handleLogin(e) {
     }
 }
 
-async function handleRegister(e) {
+window.handleRegister = async function(e) {
     e.preventDefault();
     const { auth } = await getFirebase();
     const email = document.getElementById('authEmail').value;
@@ -56,7 +56,7 @@ async function handleRegister(e) {
     }
 }
 
-async function handleLogout() {
+window.handleLogout = async function() {
     const { auth } = await getFirebase();
     await auth.signOut();
 }
@@ -133,7 +133,7 @@ async function loadSettingsFromFirebase(uid) {
 }
 
 // Equipment management functions
-async function loadEquipment() {
+window.loadEquipment = async function() {
     if (!currentUser) return;
     
     const { db } = await getFirebase();
@@ -173,7 +173,7 @@ function renderEquipmentList(equipment) {
     });
 }
 
-function showAddEquipmentForm() {
+window.showAddEquipmentForm = function() {
     document.getElementById('equipmentForm').style.display = 'block';
     document.getElementById('editingEquipmentId').value = '';
     document.getElementById('equipmentName').value = '';
@@ -183,11 +183,11 @@ function showAddEquipmentForm() {
     document.getElementById('equipmentSpeed').value = '60';
 }
 
-function hideEquipmentForm() {
+window.hideEquipmentForm = function() {
     document.getElementById('equipmentForm').style.display = 'none';
 }
 
-async function saveEquipment() {
+window.saveEquipment = async function() {
     if (!currentUser) {
         alert('Сначала войдите в систему');
         return;
@@ -229,7 +229,7 @@ async function saveEquipment() {
     }
 }
 
-async function editEquipment(id) {
+window.editEquipment = async function(id) {
     if (!currentUser) return;
     
     const { db } = await getFirebase();
@@ -252,7 +252,7 @@ async function editEquipment(id) {
     }
 }
 
-async function deleteEquipment(id) {
+window.deleteEquipment = async function(id) {
     if (!currentUser) return;
     
     if (!confirm('Удалить это оборудование?')) return;
@@ -274,7 +274,7 @@ async function deleteEquipment(id) {
 }
 
 // Consumables management functions
-async function loadConsumables() {
+window.loadConsumables = async function() {
     if (!currentUser) return;
     
     const { db } = await getFirebase();
@@ -316,7 +316,7 @@ function renderConsumablesList(consumables) {
     });
 }
 
-function showAddConsumableForm() {
+window.showAddConsumableForm = function() {
     document.getElementById('consumableForm').style.display = 'block';
     document.getElementById('editingConsumableId').value = '';
     document.getElementById('consumableName').value = '';
@@ -324,11 +324,11 @@ function showAddConsumableForm() {
     document.getElementById('consumableUnit').value = 'л';
 }
 
-function hideConsumableForm() {
+window.hideConsumableForm = function() {
     document.getElementById('consumableForm').style.display = 'none';
 }
 
-async function saveConsumable() {
+window.saveConsumable = async function() {
     if (!currentUser) {
         alert('Сначала войдите в систему');
         return;
@@ -364,7 +364,7 @@ async function saveConsumable() {
     }
 }
 
-async function editConsumable(id) {
+window.editConsumable = async function(id) {
     if (!currentUser) return;
     
     const { db } = await getFirebase();
@@ -385,7 +385,7 @@ async function editConsumable(id) {
     }
 }
 
-async function deleteConsumable(id) {
+window.deleteConsumable = async function(id) {
     if (!currentUser) return;
     
     if (!confirm('Удалить этот расходник?')) return;
@@ -403,7 +403,7 @@ async function deleteConsumable(id) {
 }
 
 // Orders management functions
-async function loadProjects() {
+window.loadProjects = async function() {
     if (!currentUser) return;
     
     const { db } = await getFirebase();
@@ -468,17 +468,17 @@ async function deleteOrder(id) {
     }
 }
 
-function showAddProjectForm() {
+window.showAddProjectForm = function() {
     document.getElementById('projectForm').style.display = 'block';
     document.getElementById('editingProjectId').value = '';
     document.getElementById('projectName').value = '';
 }
 
-function hideProjectForm() {
+window.hideProjectForm = function() {
     document.getElementById('projectForm').style.display = 'none';
 }
 
-async function saveProject() {
+window.saveProject = async function() {
     if (!currentUser) {
         alert('Сначала войдите в систему');
         return;
@@ -582,7 +582,7 @@ async function loadOrder(id) {
 }
 
 // Legacy project functions (for backward compatibility)
-async function saveAsProject() {
+window.saveAsProject = async function() {
     if (!currentUser) {
         alert('Сначала войдите в систему');
         return;
@@ -1212,7 +1212,7 @@ window.populateTestData = async function() {
     }
 };
 
-function resetForm() {
+window.resetForm = function() {
     // Reset form to default values
     const filamentType = document.getElementById('filamentType');
     const printType = document.getElementById('printType');
@@ -1422,7 +1422,7 @@ window.calculatePartCost = function(part) {
     return cost;
 };
 
-function calculateCost() {
+window.calculateCost = function() {
     try {
         // Get input values and handle potential empty values
         const getValue = (id) => {

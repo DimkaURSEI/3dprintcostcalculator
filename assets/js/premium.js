@@ -1,7 +1,7 @@
 // Premium UI JavaScript for 3D Print ERP Calculator
 
 // Toggle settings sidebar/drawer
-function toggleSettings() {
+window.toggleSettings = function() {
   const sidebar = document.getElementById('settingsSidebar');
   const mobileDrawer = document.getElementById('mobileSettingsDrawer');
   
