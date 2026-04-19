@@ -257,17 +257,17 @@
           <h2>📐 Параметры детали</h2>
 
           <div class="input-group">
-            <label for="quantity">Количество деталей:</label>
+            <label for="quantity">Количество деталей (шт):</label>
             <input type="number" id="quantity" value="1" min="1">
           </div>
 
           <div class="input-group">
-            <label for="printerCount">Количество принтеров:</label>
+            <label for="printerCount">Количество принтеров для параллельной печати:</label>
             <input type="number" id="printerCount" value="1" min="1">
           </div>
 
           <div class="input-group">
-            <label for="printerSelect">Принтер:</label>
+            <label for="printerSelect">Выберите принтер:</label>
             <select id="printerSelect" onchange="updatePrinterDefaults()">
               <option value="">Выберите принтер</option>
             </select>
@@ -278,7 +278,7 @@
           <input type="hidden" id="selectedPrinterPower">
 
           <div class="input-group">
-            <label for="materialSelect">Материал:</label>
+            <label for="materialSelect">Выберите материал:</label>
             <select id="materialSelect" onchange="updateMaterialDefaults()">
               <option value="">Выберите материал</option>
             </select>
@@ -291,7 +291,7 @@
           <!-- FDM Parameters -->
           <div class="fdm-section">
             <div class="input-group">
-              <label>Тип филамента:</label>
+              <label>Тип филамента (если не выбран материал):</label>
               <select id="filamentType" onchange="updateDefaultValues()">
                 <option value="pla">PLA</option>
                 <option value="abs">ABS</option>
@@ -305,7 +305,7 @@
               <input type="number" id="filamentCost" value="2000">
             </div>
             <div class="input-group">
-              <label>Вес печати (г):</label>
+              <label>Вес детали (г):</label>
               <input type="number" id="printWeight" value="100">
             </div>
           </div>
@@ -313,11 +313,21 @@
           <!-- SLA Parameters -->
           <div class="sla-section" style="display: none;">
             <div class="input-group">
-              <label>Стоимость смолы (₽/л):</label>
+              <label>Тип смолы (если не выбран материал):</label>
+              <select id="resinType" onchange="updateDefaultValues()">
+                <option value="standard">Стандартная</option>
+                <option value="tough">Прочная</option>
+                <option value="flexible">Гибкая</option>
+                <option value="dental">Зубная</option>
+                <option value="custom">Другая</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Стоимость смолы (₽/литр):</label>
               <input type="number" id="resinCost" value="3000">
             </div>
             <div class="input-group">
-              <label>Объём печати (мл):</label>
+              <label>Объём детали (мл):</label>
               <input type="number" id="printVolume" value="50">
             </div>
           </div>
