@@ -475,19 +475,23 @@ async function saveProject() {
         name: projectName,
         createdAt: editingId ? (await db.ref(`users/${currentUser.uid}/projects/${editingId}/createdAt`).once('value')).val() : Date.now(),
         printType: document.getElementById('printType').value,
+        quantity: document.getElementById('quantity').value,
+        printerCount: document.getElementById('printerCount').value,
+        printerId: document.getElementById('printerSelect').value,
+        materialId: document.getElementById('materialSelect').value,
         filamentType: document.getElementById('filamentType').value,
         filamentCost: document.getElementById('filamentCost').value,
-        printWeight: document.getElementById('printWeight').value,
+        partWeight: document.getElementById('partWeight').value,
         resinCost: document.getElementById('resinCost').value,
-        printVolume: document.getElementById('printVolume').value,
+        partVolume: document.getElementById('partVolume').value,
         printHours: document.getElementById('printHours').value,
         printMinutes: document.getElementById('printMinutes').value,
         electricityCost: document.getElementById('electricityCost').value,
         printerWattage: document.getElementById('printerWattage').value,
         laborHourlyRate: document.getElementById('laborHourlyRate').value,
+        paintingLaborRate: document.getElementById('paintingLaborRate').value,
         postProcessingHours: document.getElementById('postProcessingHours').value,
-        dremelWearLevel: document.getElementById('dremelWearLevel').value,
-        dremelConsumables: document.getElementById('dremelConsumables').value,
+        postProcessingLevel: document.getElementById('postProcessingLevel').value,
         paintingEnabled: document.getElementById('paintingEnabled').checked,
         paintingTime: document.getElementById('paintingTime').value,
         compressorPower: document.getElementById('compressorPower').value,
@@ -528,19 +532,23 @@ async function saveAsProject() {
         name: projectName,
         createdAt: Date.now(),
         printType: document.getElementById('printType').value,
+        quantity: document.getElementById('quantity').value,
+        printerCount: document.getElementById('printerCount').value,
+        printerId: document.getElementById('printerSelect').value,
+        materialId: document.getElementById('materialSelect').value,
         filamentType: document.getElementById('filamentType').value,
         filamentCost: document.getElementById('filamentCost').value,
-        printWeight: document.getElementById('printWeight').value,
+        partWeight: document.getElementById('partWeight').value,
         resinCost: document.getElementById('resinCost').value,
-        printVolume: document.getElementById('printVolume').value,
+        partVolume: document.getElementById('partVolume').value,
         printHours: document.getElementById('printHours').value,
         printMinutes: document.getElementById('printMinutes').value,
         electricityCost: document.getElementById('electricityCost').value,
         printerWattage: document.getElementById('printerWattage').value,
         laborHourlyRate: document.getElementById('laborHourlyRate').value,
+        paintingLaborRate: document.getElementById('paintingLaborRate').value,
         postProcessingHours: document.getElementById('postProcessingHours').value,
-        dremelWearLevel: document.getElementById('dremelWearLevel').value,
-        dremelConsumables: document.getElementById('dremelConsumables').value,
+        postProcessingLevel: document.getElementById('postProcessingLevel').value,
         paintingEnabled: document.getElementById('paintingEnabled').checked,
         paintingTime: document.getElementById('paintingTime').value,
         compressorPower: document.getElementById('compressorPower').value,
@@ -572,29 +580,81 @@ async function loadProject(id) {
         if (project) {
             // Load project data into form
             document.getElementById('printType').value = project.printType || 'fdm';
+
+            // Migration: quantity defaults to 1 for old projects
+            document.getElementById('quantity').value = project.quantity || 1;
+
+            // Migration: printerCount defaults to 1 for old projects
+            document.getElementById('printerCount').value = project.printerCount || 1;
+
+            // Load printer/material selections
+            if (document.getElementById('printerSelect')) {
+                document.getElementById('printerSelect').value = project.printerId || '';
+                if (project.printerId && typeof updatePrinterDefaults === 'function') {
+                    updatePrinterDefaults();
+                }
+            }
+
+            if (document.getElementById('materialSelect')) {
+                document.getElementById('materialSelect').value = project.materialId || '';
+                if (project.materialId && typeof updateMaterialDefaults === 'function') {
+                    updateMaterialDefaults();
+                }
+            }
+
+            // Migration: old printWeight -> partWeight
+            if (document.getElementById('partWeight')) {
+                document.getElementById('partWeight').value = project.partWeight || project.printWeight || '';
+            }
+            if (document.getElementById('printWeight')) {
+                document.getElementById('printWeight').value = project.partWeight || project.printWeight || '';
+            }
+
             if (document.getElementById('filamentType')) {
                 document.getElementById('filamentType').value = project.filamentType || 'pla';
             }
             if (document.getElementById('filamentCost')) {
                 document.getElementById('filamentCost').value = project.filamentCost || '';
             }
-            if (document.getElementById('printWeight')) {
-                document.getElementById('printWeight').value = project.printWeight || '';
+
+            // Migration: old printVolume -> partVolume
+            if (document.getElementById('partVolume')) {
+                document.getElementById('partVolume').value = project.partVolume || project.printVolume || '';
             }
+            if (document.getElementById('printVolume')) {
+                document.getElementById('printVolume').value = project.partVolume || project.printVolume || '';
+            }
+
             if (document.getElementById('resinCost')) {
                 document.getElementById('resinCost').value = project.resinCost || '';
             }
-            if (document.getElementById('printVolume')) {
-                document.getElementById('printVolume').value = project.printVolume || '';
-            }
+
             document.getElementById('printHours').value = project.printHours || '';
             document.getElementById('printMinutes').value = project.printMinutes || '';
             document.getElementById('electricityCost').value = project.electricityCost || '';
             document.getElementById('printerWattage').value = project.printerWattage || '';
             document.getElementById('laborHourlyRate').value = project.laborHourlyRate || '';
+
+            // Migration: paintingLaborRate defaults to laborHourlyRate for old projects
+            if (document.getElementById('paintingLaborRate')) {
+                document.getElementById('paintingLaborRate').value = project.paintingLaborRate || project.laborHourlyRate || '';
+            }
+
             document.getElementById('postProcessingHours').value = project.postProcessingHours || '';
-            document.getElementById('dremelWearLevel').value = project.dremelWearLevel || 'light';
-            document.getElementById('dremelConsumables').value = project.dremelConsumables || '';
+
+            // Migration: old dremelWearLevel -> postProcessingLevel
+            if (document.getElementById('postProcessingLevel')) {
+                document.getElementById('postProcessingLevel').value = project.postProcessingLevel || project.dremelWearLevel || 'light';
+            }
+            if (document.getElementById('dremelWearLevel')) {
+                document.getElementById('dremelWearLevel').value = project.postProcessingLevel || project.dremelWearLevel || 'light';
+            }
+
+            // Old field for backward compatibility
+            if (document.getElementById('dremelConsumables')) {
+                document.getElementById('dremelConsumables').value = project.dremelConsumables || '';
+            }
+
             document.getElementById('paintingEnabled').checked = project.paintingEnabled || false;
             document.getElementById('paintingTime').value = project.paintingTime || '';
             document.getElementById('compressorPower').value = project.compressorPower || '';
@@ -602,14 +662,14 @@ async function loadProject(id) {
             document.getElementById('paintSize').value = project.paintSize || 'small';
             document.getElementById('failureRate').value = project.failureRate || '';
             document.getElementById('complexity').value = project.complexity || '1.0';
-            
+
             // Trigger UI updates
             togglePrintType();
-            
+
             if (project.paintingEnabled) {
                 togglePainting();
             }
-            
+
             calculateCost();
             alert('Проект загружен!');
         }
