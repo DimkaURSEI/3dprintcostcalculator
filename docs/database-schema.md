@@ -17,6 +17,23 @@ consumables/ (includes materials like filament/resin and other consumables)
     cost: number (₽/unit)
     unit: "kg" | "л" | "шт" | "мл" | "г"
 
+## Calculator Layout
+
+The Calculator now has a 3-column layout:
+- **Left:** Order information and parts list
+- **Middle:** Part parameters form
+- **Right:** Calculated results
+
+Settings are now in a separate "Settings" tab (Calculator | Settings | ERP).
+
+## Workflow
+
+1. Create order in Calculator tab (left panel)
+2. Add parts with parameters (middle panel)
+3. Calculate cost (right panel shows results)
+4. Save order
+5. Go to ERP tab to assign parts to timeline
+
 tariffs/
   monthlyRent: number (₽/month)
   monthlyHours: number
