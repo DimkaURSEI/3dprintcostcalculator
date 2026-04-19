@@ -22,3 +22,4 @@ google-adsense:
   publisher-id: "pub-8953007004561903"
   
 exclude: ['package.json', 'src' , 'node_modules']
+include: ['assets']
