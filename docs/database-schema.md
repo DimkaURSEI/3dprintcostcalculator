@@ -59,3 +59,28 @@ projects/
     paintChemistry: number (₽)
     failureRate: number (%)
     totalCost: number (₽)
+    status: "pending" | "printing" | "post-processing" | "painting" | "completed"
+    assignedPrinterId: string (from equipment/)
+    assignedPostProcessingId: string
+    assignedPaintingId: string
+    estimatedTime: number (minutes)
+    removalTime: number (minutes, default 5)
+
+## Scheduling (new)
+
+printers/
+  {printerId}/
+    status: "available" | "busy"
+    currentOrderId: string
+
+stations/
+  postProcessing/
+    {stationId}/
+      name: string
+      status: "available" | "busy"
+      currentOrderId: string
+  painting/
+    {stationId}/
+      name: string
+      status: "available" | "busy"
+      currentOrderId: string
