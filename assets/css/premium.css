@@ -139,6 +139,23 @@ body {
   min-height: 100vh;
 }
 
+/* Bottom Navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 60px;
+  z-index: 1000;
+  padding: 0;
+  margin: 0;
+}
+
 /* Header */
 .app-header {
   background: var(--bg-secondary);
