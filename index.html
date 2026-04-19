@@ -161,15 +161,15 @@
 
           <!-- Consumables Section -->
           <div class="settings-section">
-            <h4>📦 Расходники</h4>
+            <h4>📦 Материалы и расходники</h4>
             <div id="consumablesList"></div>
-            <button onclick="showAddConsumableForm()" class="add-btn">+ Добавить расходник</button>
+            <button onclick="showAddConsumableForm()" class="add-btn">+ Добавить материал</button>
             
             <div id="consumableForm" class="form-panel" style="display: none;">
               <input type="hidden" id="editingConsumableId">
               <div class="input-group">
                 <label>Название:</label>
-                <input type="text" id="consumableName" placeholder="Изопропиловый спирт">
+                <input type="text" id="consumableName" placeholder="PLA, ABS, Изопропиловый спирт">
               </div>
               <div class="input-group">
                 <label>Стоимость (₽):</label>
@@ -178,8 +178,8 @@
               <div class="input-group">
                 <label>Единица:</label>
                 <select id="consumableUnit">
-                  <option value="л">Литры</option>
-                  <option value="кг">Килограммы</option>
+                  <option value="кг">Килограммы (филамент)</option>
+                  <option value="л">Литры (смола, спирт)</option>
                   <option value="шт">Штуки</option>
                   <option value="мл">Миллилитры</option>
                   <option value="г">Граммы</option>
