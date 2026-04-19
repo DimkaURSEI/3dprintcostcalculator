@@ -3,10 +3,29 @@ async function loadERPData() {
   
   const { db } = await getFirebase();
   
-  // Load orders
-  const ordersSnapshot = await db.ref(`users/${currentUser.uid}/projects`).once('value');
+  // Load orders and parts
+  const ordersSnapshot = await db.ref(`users/${currentUser.uid}/orders`).once('value');
   const orders = ordersSnapshot.val();
-  renderOrdersList(orders);
+  
+  // Collect all parts from all orders
+  let allParts = [];
+  if (orders) {
+    for (const [orderId, order] of Object.entries(orders)) {
+      const partsSnapshot = await db.ref(`users/${currentUser.uid}/orders/${orderId}/parts`).once('value');
+      const parts = partsSnapshot.val();
+      if (parts) {
+        Object.entries(parts).forEach(([partId, part]) => {
+          allParts.push({
+            id: partId,
+            orderId: orderId,
+            orderName: order.name,
+            ...part
+          });
+        });
+      }
+    }
+  }
+  renderPartsList(allParts);
   
   // Load printers
   const printersSnapshot = await db.ref(`users/${currentUser.uid}/equipment`).once('value');
@@ -20,27 +39,36 @@ async function loadERPData() {
   renderPaintingStations();
 }
 
-function renderOrdersList(orders) {
+function renderPartsList(parts) {
   const container = document.getElementById('ordersList');
   if (!container) return;
   
   container.innerHTML = '';
   
-  if (!orders || Object.keys(orders).length === 0) {
-    container.innerHTML = '<p style="color: #666;">Нет заказов</p>';
+  if (!parts || parts.length === 0) {
+    container.innerHTML = '<p style="color: #666;">Нет деталей</p>';
     return;
   }
   
-  Object.entries(orders).forEach(([id, item]) => {
+  parts.forEach(part => {
     const div = document.createElement('div');
     div.className = 'order-card';
     div.draggable = true;
-    div.dataset.orderId = id;
+    div.dataset.partId = part.id;
+    div.dataset.orderId = part.orderId;
+    
     div.innerHTML = `
-      <strong>${item.name}</strong>
-      <small>Статус: ${item.status || 'pending'}</small>
+      <div class="order-info">
+        <strong>${part.orderName}</strong>
+        <div>${part.name}</div>
+        <div>× ${part.quantity}</div>
+        <div>${part.filamentType || part.materialType}</div>
+      </div>
     `;
+    
     div.addEventListener('dragstart', handleDragStart);
+    div.addEventListener('dragend', handleDragEnd);
+    
     container.appendChild(div);
   });
 }
@@ -115,12 +143,14 @@ function renderPaintingStations() {
 }
 
 // Drag and drop handlers
+let draggedPartId = null;
 let draggedOrderId = null;
 
 function handleDragStart(e) {
+  draggedPartId = e.target.dataset.partId;
   draggedOrderId = e.target.dataset.orderId;
   e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', draggedOrderId);
+  e.dataTransfer.setData('text/plain', JSON.stringify({ partId: draggedPartId, orderId: draggedOrderId }));
 }
 
 function handleDragOver(e) {
@@ -150,10 +180,16 @@ async function handleDrop(e) {
   
   const stationType = dropZone.dataset.stationType;
   const stationId = dropZone.dataset.stationId;
-  const orderId = e.dataTransfer.getData('text/plain');
+  const data = e.dataTransfer.getData('text/plain');
   
-  if (!orderId) return;
+  if (!data) return;
   
-  // Placeholder - will implement full assignment later
-  console.log('Dropped order', orderId, 'to', stationType, stationId);
+  try {
+    const { partId, orderId } = JSON.parse(data);
+    
+    // Placeholder - will implement full assignment with quantity prompt in Task 5
+    console.log('Dropped part', partId, 'from order', orderId, 'to', stationType, stationId);
+  } catch (error) {
+    console.error('Error parsing drop data:', error);
+  }
 }
