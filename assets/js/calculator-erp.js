@@ -1397,6 +1397,43 @@ window.editPart = function(partId) {
     renderPartsList();
 };
 
+window.selectPart = function(partId) {
+  // Highlight selected part
+  document.querySelectorAll('.part-card').forEach(item => {
+    item.classList.remove('selected');
+  });
+  const selectedPart = document.querySelector(`[data-part-id="${partId}"]`);
+  if (selectedPart) {
+    selectedPart.classList.add('selected');
+  }
+  
+  // Load part parameters into form
+  const part = currentParts.find(p => p.id === partId);
+  if (part) {
+    // Populate form fields with part data
+    if (document.getElementById('quantity')) document.getElementById('quantity').value = part.quantity;
+    if (document.getElementById('printerCount')) document.getElementById('printerCount').value = part.printerCount;
+    if (document.getElementById('printerSelect')) document.getElementById('printerSelect').value = part.printerId;
+    if (document.getElementById('materialSelect')) document.getElementById('materialSelect').value = part.materialId;
+    if (document.getElementById('filamentType')) document.getElementById('filamentType').value = part.filamentType;
+    if (document.getElementById('filamentCost')) document.getElementById('filamentCost').value = part.filamentCost;
+    if (document.getElementById('partWeight')) document.getElementById('partWeight').value = part.partWeight;
+    if (document.getElementById('resinCost')) document.getElementById('resinCost').value = part.resinCost;
+    if (document.getElementById('partVolume')) document.getElementById('partVolume').value = part.partVolume;
+    if (document.getElementById('printHours')) document.getElementById('printHours').value = part.printHours;
+    if (document.getElementById('printMinutes')) document.getElementById('printMinutes').value = part.printMinutes;
+    if (document.getElementById('complexity')) document.getElementById('complexity').value = part.complexity;
+    if (document.getElementById('postProcessingHours')) document.getElementById('postProcessingHours').value = part.postProcessingHours;
+    if (document.getElementById('postProcessingLevel')) document.getElementById('postProcessingLevel').value = part.postProcessingLevel;
+    if (document.getElementById('paintingEnabled')) document.getElementById('paintingEnabled').checked = part.paintingEnabled;
+    if (document.getElementById('paintingTime')) document.getElementById('paintingTime').value = part.paintingTime;
+    if (document.getElementById('compressorPower')) document.getElementById('compressorPower').value = part.compressorPower;
+    if (document.getElementById('paintChemistry')) document.getElementById('paintChemistry').value = part.paintChemistry;
+    if (document.getElementById('paintArea')) document.getElementById('paintArea').value = part.paintArea;
+    if (document.getElementById('failureRate')) document.getElementById('failureRate').value = part.failureRate;
+  }
+};
+
 window.renderPartsList = function() {
     const partsList = document.getElementById('partsList');
     if (!partsList) return;
@@ -1407,15 +1444,15 @@ window.renderPartsList = function() {
     }
     
     partsList.innerHTML = currentParts.map(part => `
-        <div class="part-card" data-part-id="${part.id}">
+        <div class="part-card" data-part-id="${part.id}" onclick="selectPart('${part.id}')">
             <div class="part-info">
                 <strong>${part.name}</strong>
                 <span>× ${part.quantity}</span>
                 <span>₽${formatNumber(part.estimatedCost)}</span>
             </div>
             <div class="part-actions">
-                <button type="button" class="edit-part-btn" onclick="editPart('${part.id}')">✏️</button>
-                <button type="button" class="delete-part-btn" onclick="deletePart('${part.id}')">🗑️</button>
+                <button type="button" class="edit-part-btn" onclick="event.stopPropagation(); editPart('${part.id}')">✏️</button>
+                <button type="button" class="delete-part-btn" onclick="event.stopPropagation(); deletePart('${part.id}')">🗑️</button>
             </div>
         </div>
     `).join('');
