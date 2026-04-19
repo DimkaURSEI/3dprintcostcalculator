@@ -1657,7 +1657,7 @@ window.calculateCost = function() {
         const totalCost = costPerItem * quantity;
         
         // Update results with animations
-        updateCostDisplay('materialCost', materialCost, quantity);
+        updateCostDisplay('materialCostResult', materialCost, quantity);
         updateCostDisplay('depreciationCost', depreciationCost, quantity);
         updateCostDisplay('rentCost', rentCost, quantity);
         updateCostDisplay('powerCost', powerCost, quantity);
@@ -1665,6 +1665,7 @@ window.calculateCost = function() {
         updateCostDisplay('dremelWearCost', totalDremelCost, quantity);
         updateCostDisplay('paintingCostResult', paintingCostTotal, quantity);
         updateCostDisplay('riskCost', riskCost, quantity);
+        updateCostDisplay('complexityCost', complexityCost, quantity);
         updateCostDisplay('totalCost', totalCost, quantity);
         
         // Scroll to results if they're not visible
