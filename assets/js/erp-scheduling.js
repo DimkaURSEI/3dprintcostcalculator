@@ -52,7 +52,7 @@ function renderPrintersList(printers) {
   container.innerHTML = '';
   
   if (!printers || Object.keys(printers).length === 0) {
-    container.innerHTML = '<p style="color: #666;">Нет принтеров</p>';
+    container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">Нет принтеров.<br>Добавьте принтеры в настройках.</p>';
     return;
   }
   
@@ -67,6 +67,7 @@ function renderPrintersList(printers) {
     `;
     div.addEventListener('dragover', handleDragOver);
     div.addEventListener('drop', handleDrop);
+    div.addEventListener('dragleave', handleDragLeave);
     container.appendChild(div);
   });
 }
@@ -85,8 +86,11 @@ function renderPostProcessingStations() {
   
   // Add drop event listeners
   const dropZone = container.querySelector('.drop-zone');
-  dropZone.addEventListener('dragover', handleDragOver);
-  dropZone.addEventListener('drop', handleDrop);
+  if (dropZone) {
+    dropZone.addEventListener('dragover', handleDragOver);
+    dropZone.addEventListener('drop', handleDrop);
+    dropZone.addEventListener('dragleave', handleDragLeave);
+  }
 }
 
 function renderPaintingStations() {
@@ -103,6 +107,53 @@ function renderPaintingStations() {
   
   // Add drop event listeners
   const dropZone = container.querySelector('.drop-zone');
-  dropZone.addEventListener('dragover', handleDragOver);
-  dropZone.addEventListener('drop', handleDrop);
+  if (dropZone) {
+    dropZone.addEventListener('dragover', handleDragOver);
+    dropZone.addEventListener('drop', handleDrop);
+    dropZone.addEventListener('dragleave', handleDragLeave);
+  }
+}
+
+// Drag and drop handlers
+let draggedOrderId = null;
+
+function handleDragStart(e) {
+  draggedOrderId = e.target.dataset.orderId;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', draggedOrderId);
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  
+  const dropZone = e.target.closest('.drop-zone');
+  if (dropZone) {
+    dropZone.classList.add('drag-over');
+  }
+}
+
+function handleDragLeave(e) {
+  const dropZone = e.target.closest('.drop-zone');
+  if (dropZone) {
+    dropZone.classList.remove('drag-over');
+  }
+}
+
+async function handleDrop(e) {
+  e.preventDefault();
+  
+  const dropZone = e.target.closest('.drop-zone');
+  if (!dropZone) return;
+  
+  dropZone.classList.remove('drag-over');
+  
+  const stationType = dropZone.dataset.stationType;
+  const stationId = dropZone.dataset.stationId;
+  const orderId = e.dataTransfer.getData('text/plain');
+  
+  if (!orderId) return;
+  
+  // Placeholder - will implement full assignment later
+  console.log('Dropped order', orderId, 'to', stationType, stationId);
 }

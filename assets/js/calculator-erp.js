@@ -989,17 +989,21 @@ function createRipple(button, e) {
 }
 
 function updateLayout() {
-    // Adjust UI based on viewport height
-    const vh = window.innerHeight;
-    const calculator = document.querySelector('.calculator-box');
-    
-    if (calculator) {
-        if (vh < 600) {
-            // For very small screens (like landscape on phone)
-            calculator.classList.add('compact-view');
-        } else {
-            calculator.classList.remove('compact-view');
+    try {
+        // Adjust UI based on viewport height
+        const vh = window.innerHeight;
+        const calculator = document.querySelector('.calculator-box');
+        
+        if (calculator) {
+            if (vh < 600) {
+                // For very small screens (like landscape on phone)
+                calculator.classList.add('compact-view');
+            } else {
+                calculator.classList.remove('compact-view');
+            }
         }
+    } catch (error) {
+        console.error('Error in updateLayout:', error);
     }
 }
 
