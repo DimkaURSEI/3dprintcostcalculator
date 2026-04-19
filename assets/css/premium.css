@@ -757,3 +757,33 @@ body {
   gap: 12px;
   margin-bottom: 24px;
 }
+
+/* Order Cards */
+.order-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  cursor: grab;
+  transition: all 0.2s;
+}
+
+.order-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.order-card:active {
+  cursor: grabbing;
+}
+
+.order-card strong {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.order-card small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
