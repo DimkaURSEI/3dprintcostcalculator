@@ -125,6 +125,523 @@ async function loadSettingsFromFirebase(uid) {
     }
 }
 
+// Equipment management functions
+async function loadEquipment() {
+    if (!currentUser) return;
+    
+    const { db } = await getFirebase();
+    
+    try {
+        const snapshot = await db.ref(`users/${currentUser.uid}/equipment`).once('value');
+        const equipment = snapshot.val();
+        
+        if (equipment) {
+            renderEquipmentList(equipment);
+        }
+    } catch (error) {
+        console.error('Error loading equipment:', error);
+    }
+}
+
+function renderEquipmentList(equipment) {
+    const container = document.getElementById('equipmentList');
+    container.innerHTML = '';
+    
+    if (!equipment || Object.keys(equipment).length === 0) {
+        container.innerHTML = '<p style="color: #666;">Нет добавленного оборудования</p>';
+        return;
+    }
+    
+    Object.entries(equipment).forEach(([id, item]) => {
+        const div = document.createElement('div');
+        div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #1e293b; margin-bottom: 8px; border-radius: 4px;';
+        div.innerHTML = `
+            <span><strong>${item.name}</strong> - ${item.cost}₽, ${item.lifespan}ч, ${item.power}Вт, ${item.speed}мм/с</span>
+            <div>
+                <button onclick="editEquipment('${id}')" style="margin-right: 5px;">✏️</button>
+                <button onclick="deleteEquipment('${id}')">🗑️</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function showAddEquipmentForm() {
+    document.getElementById('equipmentForm').style.display = 'block';
+    document.getElementById('editingEquipmentId').value = '';
+    document.getElementById('equipmentName').value = '';
+    document.getElementById('equipmentCost').value = '50000';
+    document.getElementById('equipmentLifespan').value = '20000';
+    document.getElementById('equipmentPower').value = '300';
+    document.getElementById('equipmentSpeed').value = '60';
+}
+
+function hideEquipmentForm() {
+    document.getElementById('equipmentForm').style.display = 'none';
+}
+
+async function saveEquipment() {
+    if (!currentUser) {
+        alert('Сначала войдите в систему');
+        return;
+    }
+    
+    const { db } = await getFirebase();
+    
+    const editingId = document.getElementById('editingEquipmentId').value;
+    const equipment = {
+        name: document.getElementById('equipmentName').value,
+        cost: parseFloat(document.getElementById('equipmentCost').value),
+        lifespan: parseFloat(document.getElementById('equipmentLifespan').value),
+        power: parseFloat(document.getElementById('equipmentPower').value),
+        speed: parseFloat(document.getElementById('equipmentSpeed').value)
+    };
+    
+    if (!equipment.name) {
+        alert('Введите название оборудования');
+        return;
+    }
+    
+    try {
+        if (editingId) {
+            await db.ref(`users/${currentUser.uid}/equipment/${editingId}`).update(equipment);
+        } else {
+            await db.ref(`users/${currentUser.uid}/equipment`).push(equipment);
+        }
+        
+        hideEquipmentForm();
+        loadEquipment();
+        alert('Оборудование сохранено!');
+    } catch (error) {
+        console.error('Error saving equipment:', error);
+        alert('Ошибка сохранения: ' + error.message);
+    }
+}
+
+async function editEquipment(id) {
+    if (!currentUser) return;
+    
+    const { db } = await getFirebase();
+    
+    try {
+        const snapshot = await db.ref(`users/${currentUser.uid}/equipment/${id}`).once('value');
+        const equipment = snapshot.val();
+        
+        if (equipment) {
+            document.getElementById('equipmentForm').style.display = 'block';
+            document.getElementById('editingEquipmentId').value = id;
+            document.getElementById('equipmentName').value = equipment.name;
+            document.getElementById('equipmentCost').value = equipment.cost;
+            document.getElementById('equipmentLifespan').value = equipment.lifespan;
+            document.getElementById('equipmentPower').value = equipment.power;
+            document.getElementById('equipmentSpeed').value = equipment.speed;
+        }
+    } catch (error) {
+        console.error('Error loading equipment:', error);
+    }
+}
+
+async function deleteEquipment(id) {
+    if (!currentUser) return;
+    
+    if (!confirm('Удалить это оборудование?')) return;
+    
+    const { db } = await getFirebase();
+    
+    try {
+        await db.ref(`users/${currentUser.uid}/equipment/${id}`).remove();
+        loadEquipment();
+        alert('Оборудование удалено!');
+    } catch (error) {
+        console.error('Error deleting equipment:', error);
+        alert('Ошибка удаления: ' + error.message);
+    }
+}
+
+// Consumables management functions
+async function loadConsumables() {
+    if (!currentUser) return;
+    
+    const { db } = await getFirebase();
+    
+    try {
+        const snapshot = await db.ref(`users/${currentUser.uid}/consumables`).once('value');
+        const consumables = snapshot.val();
+        
+        if (consumables) {
+            renderConsumablesList(consumables);
+        }
+    } catch (error) {
+        console.error('Error loading consumables:', error);
+    }
+}
+
+function renderConsumablesList(consumables) {
+    const container = document.getElementById('consumablesList');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (!consumables || Object.keys(consumables).length === 0) {
+        container.innerHTML = '<p style="color: #666;">Нет добавленных расходников</p>';
+        return;
+    }
+    
+    Object.entries(consumables).forEach(([id, item]) => {
+        const div = document.createElement('div');
+        div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #1e293b; margin-bottom: 8px; border-radius: 4px;';
+        div.innerHTML = `
+            <span><strong>${item.name}</strong> - ${item.cost}₽/${item.unit}</span>
+            <div>
+                <button onclick="editConsumable('${id}')" style="margin-right: 5px;">✏️</button>
+                <button onclick="deleteConsumable('${id}')">🗑️</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function showAddConsumableForm() {
+    document.getElementById('consumableForm').style.display = 'block';
+    document.getElementById('editingConsumableId').value = '';
+    document.getElementById('consumableName').value = '';
+    document.getElementById('consumableCost').value = '500';
+    document.getElementById('consumableUnit').value = 'л';
+}
+
+function hideConsumableForm() {
+    document.getElementById('consumableForm').style.display = 'none';
+}
+
+async function saveConsumable() {
+    if (!currentUser) {
+        alert('Сначала войдите в систему');
+        return;
+    }
+    
+    const { db } = await getFirebase();
+    
+    const editingId = document.getElementById('editingConsumableId').value;
+    const consumable = {
+        name: document.getElementById('consumableName').value,
+        cost: parseFloat(document.getElementById('consumableCost').value),
+        unit: document.getElementById('consumableUnit').value
+    };
+    
+    if (!consumable.name) {
+        alert('Введите название расходника');
+        return;
+    }
+    
+    try {
+        if (editingId) {
+            await db.ref(`users/${currentUser.uid}/consumables/${editingId}`).update(consumable);
+        } else {
+            await db.ref(`users/${currentUser.uid}/consumables`).push(consumable);
+        }
+        
+        hideConsumableForm();
+        loadConsumables();
+        alert('Расходник сохранён!');
+    } catch (error) {
+        console.error('Error saving consumable:', error);
+        alert('Ошибка сохранения: ' + error.message);
+    }
+}
+
+async function editConsumable(id) {
+    if (!currentUser) return;
+    
+    const { db } = await getFirebase();
+    
+    try {
+        const snapshot = await db.ref(`users/${currentUser.uid}/consumables/${id}`).once('value');
+        const consumable = snapshot.val();
+        
+        if (consumable) {
+            document.getElementById('consumableForm').style.display = 'block';
+            document.getElementById('editingConsumableId').value = id;
+            document.getElementById('consumableName').value = consumable.name;
+            document.getElementById('consumableCost').value = consumable.cost;
+            document.getElementById('consumableUnit').value = consumable.unit;
+        }
+    } catch (error) {
+        console.error('Error loading consumable:', error);
+    }
+}
+
+async function deleteConsumable(id) {
+    if (!currentUser) return;
+    
+    if (!confirm('Удалить этот расходник?')) return;
+    
+    const { db } = await getFirebase();
+    
+    try {
+        await db.ref(`users/${currentUser.uid}/consumables/${id}`).remove();
+        loadConsumables();
+        alert('Расходник удалён!');
+    } catch (error) {
+        console.error('Error deleting consumable:', error);
+        alert('Ошибка удаления: ' + error.message);
+    }
+}
+
+// Projects management functions
+async function loadProjects() {
+    if (!currentUser) return;
+    
+    const { db } = await getFirebase();
+    
+    try {
+        const snapshot = await db.ref(`users/${currentUser.uid}/projects`).once('value');
+        const projects = snapshot.val();
+        
+        if (projects) {
+            renderProjectsList(projects);
+        }
+    } catch (error) {
+        console.error('Error loading projects:', error);
+    }
+}
+
+function renderProjectsList(projects) {
+    const container = document.getElementById('projectsList');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (!projects || Object.keys(projects).length === 0) {
+        container.innerHTML = '<p style="color: #666;">Нет проектов</p>';
+        return;
+    }
+    
+    Object.entries(projects).forEach(([id, item]) => {
+        const div = document.createElement('div');
+        div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #1e293b; margin-bottom: 8px; border-radius: 4px;';
+        const date = new Date(item.createdAt).toLocaleDateString('ru-RU');
+        div.innerHTML = `
+            <span><strong>${item.name}</strong> - ${date}</span>
+            <div>
+                <button onclick="loadProject('${id}')">📂</button>
+                <button onclick="editProject('${id}')" style="margin-left: 5px;">✏️</button>
+                <button onclick="deleteProject('${id}')" style="margin-left: 5px;">🗑️</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function showAddProjectForm() {
+    document.getElementById('projectForm').style.display = 'block';
+    document.getElementById('editingProjectId').value = '';
+    document.getElementById('projectName').value = '';
+}
+
+function hideProjectForm() {
+    document.getElementById('projectForm').style.display = 'none';
+}
+
+async function saveProject() {
+    if (!currentUser) {
+        alert('Сначала войдите в систему');
+        return;
+    }
+    
+    const { db } = await getFirebase();
+    
+    const editingId = document.getElementById('editingProjectId').value;
+    const projectName = document.getElementById('projectName').value;
+    
+    if (!projectName) {
+        alert('Введите название проекта');
+        return;
+    }
+    
+    // Collect all project data from form
+    const projectData = {
+        name: projectName,
+        createdAt: editingId ? (await db.ref(`users/${currentUser.uid}/projects/${editingId}/createdAt`).once('value')).val() : Date.now(),
+        printType: document.getElementById('printType').value,
+        filamentType: document.getElementById('filamentType').value,
+        filamentCost: document.getElementById('filamentCost').value,
+        printWeight: document.getElementById('printWeight').value,
+        resinCost: document.getElementById('resinCost').value,
+        printVolume: document.getElementById('printVolume').value,
+        printHours: document.getElementById('printHours').value,
+        printMinutes: document.getElementById('printMinutes').value,
+        electricityCost: document.getElementById('electricityCost').value,
+        printerWattage: document.getElementById('printerWattage').value,
+        laborHourlyRate: document.getElementById('laborHourlyRate').value,
+        postProcessingHours: document.getElementById('postProcessingHours').value,
+        dremelWearLevel: document.getElementById('dremelWearLevel').value,
+        dremelConsumables: document.getElementById('dremelConsumables').value,
+        paintingEnabled: document.getElementById('paintingEnabled').checked,
+        paintingTime: document.getElementById('paintingTime').value,
+        compressorPower: document.getElementById('compressorPower').value,
+        paintChemistry: document.getElementById('paintChemistry').value,
+        paintSize: document.getElementById('paintSize').value,
+        failureRate: document.getElementById('failureRate').value,
+        complexity: document.getElementById('complexity').value
+    };
+    
+    try {
+        if (editingId) {
+            await db.ref(`users/${currentUser.uid}/projects/${editingId}`).update(projectData);
+        } else {
+            await db.ref(`users/${currentUser.uid}/projects`).push(projectData);
+        }
+        
+        hideProjectForm();
+        loadProjects();
+        alert('Проект сохранён!');
+    } catch (error) {
+        console.error('Error saving project:', error);
+        alert('Ошибка сохранения: ' + error.message);
+    }
+}
+
+async function saveAsProject() {
+    if (!currentUser) {
+        alert('Сначала войдите в систему');
+        return;
+    }
+    
+    const projectName = prompt('Введите название проекта:');
+    if (!projectName) return;
+    
+    const { db } = await getFirebase();
+    
+    const projectData = {
+        name: projectName,
+        createdAt: Date.now(),
+        printType: document.getElementById('printType').value,
+        filamentType: document.getElementById('filamentType').value,
+        filamentCost: document.getElementById('filamentCost').value,
+        printWeight: document.getElementById('printWeight').value,
+        resinCost: document.getElementById('resinCost').value,
+        printVolume: document.getElementById('printVolume').value,
+        printHours: document.getElementById('printHours').value,
+        printMinutes: document.getElementById('printMinutes').value,
+        electricityCost: document.getElementById('electricityCost').value,
+        printerWattage: document.getElementById('printerWattage').value,
+        laborHourlyRate: document.getElementById('laborHourlyRate').value,
+        postProcessingHours: document.getElementById('postProcessingHours').value,
+        dremelWearLevel: document.getElementById('dremelWearLevel').value,
+        dremelConsumables: document.getElementById('dremelConsumables').value,
+        paintingEnabled: document.getElementById('paintingEnabled').checked,
+        paintingTime: document.getElementById('paintingTime').value,
+        compressorPower: document.getElementById('compressorPower').value,
+        paintChemistry: document.getElementById('paintChemistry').value,
+        paintSize: document.getElementById('paintSize').value,
+        failureRate: document.getElementById('failureRate').value,
+        complexity: document.getElementById('complexity').value
+    };
+    
+    try {
+        await db.ref(`users/${currentUser.uid}/projects`).push(projectData);
+        loadProjects();
+        alert('Проект сохранён!');
+    } catch (error) {
+        console.error('Error saving project:', error);
+        alert('Ошибка сохранения: ' + error.message);
+    }
+}
+
+async function loadProject(id) {
+    if (!currentUser) return;
+    
+    const { db } = await getFirebase();
+    
+    try {
+        const snapshot = await db.ref(`users/${currentUser.uid}/projects/${id}`).once('value');
+        const project = snapshot.val();
+        
+        if (project) {
+            // Load project data into form
+            document.getElementById('printType').value = project.printType || 'fdm';
+            if (document.getElementById('filamentType')) {
+                document.getElementById('filamentType').value = project.filamentType || 'pla';
+            }
+            if (document.getElementById('filamentCost')) {
+                document.getElementById('filamentCost').value = project.filamentCost || '';
+            }
+            if (document.getElementById('printWeight')) {
+                document.getElementById('printWeight').value = project.printWeight || '';
+            }
+            if (document.getElementById('resinCost')) {
+                document.getElementById('resinCost').value = project.resinCost || '';
+            }
+            if (document.getElementById('printVolume')) {
+                document.getElementById('printVolume').value = project.printVolume || '';
+            }
+            document.getElementById('printHours').value = project.printHours || '';
+            document.getElementById('printMinutes').value = project.printMinutes || '';
+            document.getElementById('electricityCost').value = project.electricityCost || '';
+            document.getElementById('printerWattage').value = project.printerWattage || '';
+            document.getElementById('laborHourlyRate').value = project.laborHourlyRate || '';
+            document.getElementById('postProcessingHours').value = project.postProcessingHours || '';
+            document.getElementById('dremelWearLevel').value = project.dremelWearLevel || 'light';
+            document.getElementById('dremelConsumables').value = project.dremelConsumables || '';
+            document.getElementById('paintingEnabled').checked = project.paintingEnabled || false;
+            document.getElementById('paintingTime').value = project.paintingTime || '';
+            document.getElementById('compressorPower').value = project.compressorPower || '';
+            document.getElementById('paintChemistry').value = project.paintChemistry || '';
+            document.getElementById('paintSize').value = project.paintSize || 'small';
+            document.getElementById('failureRate').value = project.failureRate || '';
+            document.getElementById('complexity').value = project.complexity || '1.0';
+            
+            // Trigger UI updates
+            togglePrintType();
+            
+            if (project.paintingEnabled) {
+                togglePainting();
+            }
+            
+            calculateCost();
+            alert('Проект загружен!');
+        }
+    } catch (error) {
+        console.error('Error loading project:', error);
+    }
+}
+
+async function editProject(id) {
+    if (!currentUser) return;
+    
+    const { db } = await getFirebase();
+    
+    try {
+        const snapshot = await db.ref(`users/${currentUser.uid}/projects/${id}`).once('value');
+        const project = snapshot.val();
+        
+        if (project) {
+            document.getElementById('projectForm').style.display = 'block';
+            document.getElementById('editingProjectId').value = id;
+            document.getElementById('projectName').value = project.name;
+        }
+    } catch (error) {
+        console.error('Error loading project:', error);
+    }
+}
+
+async function deleteProject(id) {
+    if (!currentUser) return;
+    
+    if (!confirm('Удалить этот проект?')) return;
+    
+    const { db } = await getFirebase();
+    
+    try {
+        await db.ref(`users/${currentUser.uid}/projects/${id}`).remove();
+        loadProjects();
+        alert('Проект удалён!');
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        alert('Ошибка удаления: ' + error.message);
+    }
+}
+
 // Dremel wear level costs
 const dremelWearCosts = {
     light: 50,
@@ -146,6 +663,15 @@ function initCalculator() {
     
     // Load saved settings from LocalStorage
     loadSettings();
+    
+    // Load equipment from Firebase
+    loadEquipment();
+    
+    // Load consumables from Firebase
+    loadConsumables();
+    
+    // Load projects from Firebase
+    loadProjects();
     
     // Set up event listeners for all input fields to auto-calculate on change
     const allInputs = document.querySelectorAll('input, select');
@@ -588,10 +1114,10 @@ function calculateCost() {
         // Risk cost
         const failureRate = getValue('failureRate');
         const riskCost = subtotal * (failureRate / 100);
+        const complexity = parseFloat(document.getElementById('complexity').value) || 1.0;
+        const complexityCost = (laborCostTotal + postProcessingCost) * (complexity - 1);
+        const totalCost = subtotal + riskCost + complexityCost;
         
-        // Total cost
-        const totalCost = subtotal + riskCost;
-
         // Update results with animations
         updateCostDisplay('materialCost', materialCost);
         updateCostDisplay('depreciationCost', depreciationCost);
