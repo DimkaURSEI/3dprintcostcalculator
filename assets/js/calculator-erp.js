@@ -1018,8 +1018,30 @@ function updateDefaultValues() {
     calculateCost();
 }
 
+// Tab switching for ERP
+function switchTab(tabName) {
+    const calculatorTab = document.getElementById('mainApp');
+    const erpTab = document.getElementById('erpTab');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+
+    if (tabName === 'calculator') {
+        calculatorTab.style.display = 'flex';
+        erpTab.style.display = 'none';
+        tabButtons[0].classList.add('active');
+    } else {
+        calculatorTab.style.display = 'none';
+        erpTab.style.display = 'block';
+        tabButtons[1].classList.add('active');
+        if (typeof loadERPData === 'function') {
+            loadERPData();
+        }
+    }
+}
+
 function resetForm() {
-    // Reset to default filament type
+    // Reset form to default values
     const filamentType = document.getElementById('filamentType');
     const printType = document.getElementById('printType');
     if (filamentType) filamentType.value = 'pla';
