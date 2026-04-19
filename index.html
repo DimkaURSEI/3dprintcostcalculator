@@ -89,14 +89,22 @@
         </select>
       </div>
       <div class="header-right">
-        <div class="tab-buttons">
-          <button class="tab-btn active" onclick="switchTab('calculator')">Калькулятор</button>
-          <button class="tab-btn" onclick="switchTab('erp')">ERP Планирование</button>
-        </div>
         <span id="userInfo"></span>
         <button onclick="handleLogout()" class="icon-btn"><i class="fas fa-sign-out-alt"></i></button>
       </div>
     </header>
+
+    <!-- Navigation Sidebar -->
+    <aside class="nav-sidebar">
+      <div class="nav-item active" onclick="switchTab('calculator')" data-tab="calculator">
+        <i class="fas fa-calculator"></i>
+        <span>Калькулятор</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('erp')" data-tab="erp">
+        <i class="fas fa-tasks"></i>
+        <span>ERP Планирование</span>
+      </div>
+    </aside>
 
     <!-- Main Content Grid -->
     <div class="main-grid">

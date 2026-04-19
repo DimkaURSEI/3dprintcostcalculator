@@ -1022,18 +1022,18 @@ function updateDefaultValues() {
 function switchTab(tabName) {
     const calculatorTab = document.getElementById('mainApp');
     const erpTab = document.getElementById('erpTab');
-    const tabButtons = document.querySelectorAll('.tab-btn');
+    const navItems = document.querySelectorAll('.nav-item');
 
-    tabButtons.forEach(btn => btn.classList.remove('active'));
+    navItems.forEach(item => item.classList.remove('active'));
 
     if (tabName === 'calculator') {
         calculatorTab.style.display = 'flex';
         erpTab.style.display = 'none';
-        tabButtons[0].classList.add('active');
+        document.querySelector('[data-tab="calculator"]').classList.add('active');
     } else {
         calculatorTab.style.display = 'none';
         erpTab.style.display = 'block';
-        tabButtons[1].classList.add('active');
+        document.querySelector('[data-tab="erp"]').classList.add('active');
         if (typeof loadERPData === 'function') {
             loadERPData();
         }
