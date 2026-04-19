@@ -264,6 +264,28 @@
 
       <!-- Main Working Area -->
       <main class="working-area">
+        <!-- Order Info -->
+        <section class="card">
+          <h2>📦 Заказ</h2>
+          <div class="input-group">
+            <label for="orderName">Название заказа:</label>
+            <input type="text" id="orderName" placeholder="Название заказа">
+          </div>
+          <div class="input-group">
+            <label for="clientName">Клиент (опционально):</label>
+            <input type="text" id="clientName" placeholder="Имя клиента">
+          </div>
+          <div class="parts-header">
+            <h3>Детали в заказе</h3>
+            <button type="button" class="add-part-btn" onclick="addPart()">+ Добавить деталь</button>
+          </div>
+          <div id="partsList" class="parts-list"></div>
+          <div class="total-cost-display">
+            <span>Итого по заказу:</span>
+            <span id="totalOrderCost">₽0</span>
+          </div>
+        </section>
+
         <!-- Part Parameters -->
         <section class="card">
           <h2>📐 Параметры детали</h2>

@@ -453,6 +453,117 @@ body {
   margin-bottom: 20px;
 }
 
+/* Parts Management */
+.parts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.parts-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.add-part-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.add-part-btn:hover {
+  background: var(--primary-hover);
+}
+
+.parts-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+.empty-parts {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 20px;
+}
+
+.part-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.part-info {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.part-info strong {
+  color: var(--text-primary);
+}
+
+.part-info span {
+  color: var(--text-secondary);
+}
+
+.part-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-part-btn,
+.delete-part-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.edit-part-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.delete-part-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.total-cost-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.total-cost-display span:first-child {
+  color: var(--text-primary);
+}
+
+.total-cost-display span:last-child {
+  color: var(--primary);
+}
+
 .input-group {
   margin-bottom: 16px;
 }

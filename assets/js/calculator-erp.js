@@ -9,6 +9,9 @@ const filamentDefaults = {
 
 // Firebase Auth functions
 let currentUser = null;
+let editingId = null;
+let currentOrderId = null;
+let currentParts = [];
 
 async function initFirebase() {
     const { auth } = await getFirebase();
@@ -399,49 +402,70 @@ async function deleteConsumable(id) {
     }
 }
 
-// Projects management functions
+// Orders management functions
 async function loadProjects() {
     if (!currentUser) return;
     
     const { db } = await getFirebase();
     
     try {
-        const snapshot = await db.ref(`users/${currentUser.uid}/projects`).once('value');
-        const projects = snapshot.val();
+        const snapshot = await db.ref(`users/${currentUser.uid}/orders`).once('value');
+        const orders = snapshot.val();
         
-        if (projects) {
-            renderProjectsList(projects);
+        if (orders) {
+            renderOrdersList(orders);
         }
     } catch (error) {
-        console.error('Error loading projects:', error);
+        console.error('Error loading orders:', error);
     }
 }
 
-function renderProjectsList(projects) {
+function renderOrdersList(orders) {
     const container = document.getElementById('projectsList');
     if (!container) return;
     
     container.innerHTML = '';
     
-    if (!projects || Object.keys(projects).length === 0) {
-        container.innerHTML = '<p style="color: #666;">Нет проектов</p>';
+    if (!orders || Object.keys(orders).length === 0) {
+        container.innerHTML = '<p style="color: #666;">Нет заказов</p>';
         return;
     }
     
-    Object.entries(projects).forEach(([id, item]) => {
+    Object.entries(orders).forEach(([id, item]) => {
         const div = document.createElement('div');
         div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #1e293b; margin-bottom: 8px; border-radius: 4px;';
         const date = new Date(item.createdAt).toLocaleDateString('ru-RU');
         div.innerHTML = `
             <span><strong>${item.name}</strong> - ${date}</span>
             <div>
-                <button onclick="loadProject('${id}')">📂</button>
-                <button onclick="editProject('${id}')" style="margin-left: 5px;">✏️</button>
-                <button onclick="deleteProject('${id}')" style="margin-left: 5px;">🗑️</button>
+                <button onclick="loadOrder('${id}')">📂</button>
+                <button onclick="editOrder('${id}')" style="margin-left: 5px;">✏️</button>
+                <button onclick="deleteOrder('${id}')" style="margin-left: 5px;">🗑️</button>
             </div>
         `;
         container.appendChild(div);
     });
+}
+
+async function editOrder(id) {
+    await loadOrder(id);
+}
+
+async function deleteOrder(id) {
+    if (!confirm('Удалить заказ?')) return;
+    
+    if (!currentUser) return;
+    
+    const { db } = await getFirebase();
+    
+    try {
+        await db.ref(`users/${currentUser.uid}/orders/${id}`).remove();
+        loadProjects();
+        alert('Заказ удалён!');
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        alert('Ошибка удаления: ' + error.message);
+    }
 }
 
 function showAddProjectForm() {
@@ -463,60 +487,98 @@ async function saveProject() {
     const { db } = await getFirebase();
     
     const editingId = document.getElementById('editingProjectId').value;
-    const projectName = document.getElementById('projectName').value;
+    const orderName = document.getElementById('orderName').value;
+    const clientName = document.getElementById('clientName').value;
     
-    if (!projectName) {
-        alert('Введите название проекта');
+    if (!orderName) {
+        alert('Введите название заказа');
         return;
     }
     
-    // Collect all project data from form
-    const projectData = {
-        name: projectName,
-        createdAt: editingId ? (await db.ref(`users/${currentUser.uid}/projects/${editingId}/createdAt`).once('value')).val() : Date.now(),
-        printType: document.getElementById('printType').value,
-        quantity: document.getElementById('quantity').value,
-        printerCount: document.getElementById('printerCount').value,
-        printerId: document.getElementById('printerSelect').value,
-        materialId: document.getElementById('materialSelect').value,
-        filamentType: document.getElementById('filamentType').value,
-        filamentCost: document.getElementById('filamentCost').value,
-        partWeight: document.getElementById('partWeight').value,
-        resinCost: document.getElementById('resinCost').value,
-        partVolume: document.getElementById('partVolume').value,
-        printHours: document.getElementById('printHours').value,
-        printMinutes: document.getElementById('printMinutes').value,
-        electricityCost: document.getElementById('electricityCost').value,
-        printerWattage: document.getElementById('printerWattage').value,
-        laborHourlyRate: document.getElementById('laborHourlyRate').value,
-        paintingLaborRate: document.getElementById('paintingLaborRate').value,
-        postProcessingHours: document.getElementById('postProcessingHours').value,
-        postProcessingLevel: document.getElementById('postProcessingLevel').value,
-        paintingEnabled: document.getElementById('paintingEnabled').checked,
-        paintingTime: document.getElementById('paintingTime').value,
-        compressorPower: document.getElementById('compressorPower').value,
-        paintChemistry: document.getElementById('paintChemistry').value,
-        paintArea: document.getElementById('paintArea').value,
-        failureRate: document.getElementById('failureRate').value,
-        complexity: document.getElementById('complexity').value
+    if (currentParts.length === 0) {
+        alert('Добавьте хотя бы одну деталь в заказ');
+        return;
+    }
+    
+    // Calculate costs for all parts
+    currentParts.forEach(part => {
+        part.estimatedCost = calculatePartCost(part);
+    });
+    
+    const totalOrderCost = currentParts.reduce((sum, part) => sum + (part.estimatedCost || 0), 0);
+    
+    // Save order metadata
+    const orderId = editingId || db.ref(`users/${currentUser.uid}/orders`).push().key;
+    const orderData = {
+        name: orderName,
+        clientName: clientName || '',
+        createdAt: editingId ? (await db.ref(`users/${currentUser.uid}/orders/${orderId}/createdAt`).once('value')).val() : Date.now(),
+        status: 'pending',
+        totalCost: totalOrderCost
     };
     
-    try {
-        if (editingId) {
-            await db.ref(`users/${currentUser.uid}/projects/${editingId}`).update(projectData);
-        } else {
-            await db.ref(`users/${currentUser.uid}/projects`).push(projectData);
-        }
-        
-        hideProjectForm();
+    await db.ref(`users/${currentUser.uid}/orders/${orderId}`).set(orderData);
+    
+    // Save parts
+    for (const part of currentParts) {
+        const partId = db.ref(`users/${currentUser.uid}/orders/${orderId}/parts`).push().key;
+        const { id, ...partData } = part;
+        await db.ref(`users/${currentUser.uid}/orders/${orderId}/parts/${partId}`).set(partData);
+    }
+    
+    alert('Заказ сохранён!');
+    currentOrderId = null;
+    currentParts = [];
+    document.getElementById('orderName').value = '';
+    document.getElementById('clientName').value = '';
+    document.getElementById('editingProjectId').value = '';
+    renderPartsList();
+    updateTotalOrderCost();
+    
+    // Reload orders list
+    if (typeof loadProjects === 'function') {
         loadProjects();
-        alert('Проект сохранён!');
-    } catch (error) {
-        console.error('Error saving project:', error);
-        alert('Ошибка сохранения: ' + error.message);
     }
 }
 
+async function loadOrder(id) {
+    if (!currentUser) return;
+    
+    const { db } = await getFirebase();
+    
+    try {
+        const orderSnapshot = await db.ref(`users/${currentUser.uid}/orders/${id}`).once('value');
+        const order = orderSnapshot.val();
+        
+        if (order) {
+            currentOrderId = id;
+            document.getElementById('orderName').value = order.name || '';
+            document.getElementById('clientName').value = order.clientName || '';
+            document.getElementById('editingProjectId').value = id;
+            
+            // Load parts
+            const partsSnapshot = await db.ref(`users/${currentUser.uid}/orders/${id}/parts`).once('value');
+            const parts = partsSnapshot.val();
+            
+            if (parts) {
+                currentParts = Object.entries(parts).map(([partId, part]) => ({
+                    id: partId,
+                    ...part
+                }));
+            } else {
+                currentParts = [];
+            }
+            
+            renderPartsList();
+            updateTotalOrderCost();
+        }
+    } catch (error) {
+        console.error('Error loading order:', error);
+        alert('Ошибка загрузки: ' + error.message);
+    }
+}
+
+// Legacy project functions (for backward compatibility)
 async function saveAsProject() {
     if (!currentUser) {
         alert('Сначала войдите в систему');
@@ -1210,6 +1272,152 @@ function resetForm() {
     // Focus on the first input field
     if (printType) printType.focus();
 }
+
+// Parts Management Functions
+window.addPart = function() {
+    const partId = Date.now().toString();
+    const part = {
+        id: partId,
+        name: `Деталь ${currentParts.length + 1}`,
+        printType: document.getElementById('printType')?.value || 'fdm',
+        quantity: document.getElementById('quantity')?.value || 1,
+        printerCount: document.getElementById('printerCount')?.value || 1,
+        printerId: document.getElementById('printerSelect')?.value || '',
+        materialId: document.getElementById('materialSelect')?.value || '',
+        filamentType: document.getElementById('filamentType')?.value || 'pla',
+        filamentCost: document.getElementById('filamentCost')?.value || 2000,
+        partWeight: document.getElementById('partWeight')?.value || 100,
+        resinCost: document.getElementById('resinCost')?.value || 3000,
+        partVolume: document.getElementById('partVolume')?.value || 50,
+        printHours: document.getElementById('printHours')?.value || 3,
+        printMinutes: document.getElementById('printMinutes')?.value || 0,
+        electricityCost: document.getElementById('electricityCost')?.value || 5.47,
+        printerWattage: document.getElementById('printerWattage')?.value || 300,
+        laborHourlyRate: document.getElementById('laborHourlyRate')?.value || 500,
+        postProcessingHours: document.getElementById('postProcessingHours')?.value || 1,
+        dremelWearLevel: document.getElementById('dremelWearLevel')?.value || 'light',
+        dremelConsumables: document.getElementById('dremelConsumables')?.value || 0,
+        paintingEnabled: document.getElementById('paintingEnabled')?.checked || false,
+        paintingTime: document.getElementById('paintingTime')?.value || 1,
+        compressorPower: document.getElementById('compressorPower')?.value || 500,
+        paintChemistry: document.getElementById('paintChemistry')?.value || 50,
+        paintArea: document.getElementById('paintArea')?.value || 100,
+        failureRate: document.getElementById('failureRate')?.value || 10,
+        complexity: document.getElementById('complexity')?.value || 1.0,
+        estimatedCost: 0
+    };
+    
+    currentParts.push(part);
+    renderPartsList();
+    updateTotalOrderCost();
+};
+
+window.deletePart = function(partId) {
+    currentParts = currentParts.filter(p => p.id !== partId);
+    renderPartsList();
+    updateTotalOrderCost();
+};
+
+window.editPart = function(partId) {
+    const part = currentParts.find(p => p.id === partId);
+    if (!part) return;
+    
+    // Load part data into form
+    if (document.getElementById('printType')) document.getElementById('printType').value = part.printType;
+    if (document.getElementById('quantity')) document.getElementById('quantity').value = part.quantity;
+    if (document.getElementById('printerCount')) document.getElementById('printerCount').value = part.printerCount;
+    if (document.getElementById('printerSelect')) document.getElementById('printerSelect').value = part.printerId;
+    if (document.getElementById('materialSelect')) document.getElementById('materialSelect').value = part.materialId;
+    if (document.getElementById('filamentType')) document.getElementById('filamentType').value = part.filamentType;
+    if (document.getElementById('filamentCost')) document.getElementById('filamentCost').value = part.filamentCost;
+    if (document.getElementById('partWeight')) document.getElementById('partWeight').value = part.partWeight;
+    if (document.getElementById('resinCost')) document.getElementById('resinCost').value = part.resinCost;
+    if (document.getElementById('partVolume')) document.getElementById('partVolume').value = part.partVolume;
+    if (document.getElementById('printHours')) document.getElementById('printHours').value = part.printHours;
+    if (document.getElementById('printMinutes')) document.getElementById('printMinutes').value = part.printMinutes;
+    if (document.getElementById('electricityCost')) document.getElementById('electricityCost').value = part.electricityCost;
+    if (document.getElementById('printerWattage')) document.getElementById('printerWattage').value = part.printerWattage;
+    if (document.getElementById('laborHourlyRate')) document.getElementById('laborHourlyRate').value = part.laborHourlyRate;
+    if (document.getElementById('postProcessingHours')) document.getElementById('postProcessingHours').value = part.postProcessingHours;
+    if (document.getElementById('dremelWearLevel')) document.getElementById('dremelWearLevel').value = part.dremelWearLevel;
+    if (document.getElementById('dremelConsumables')) document.getElementById('dremelConsumables').value = part.dremelConsumables;
+    if (document.getElementById('paintingEnabled')) document.getElementById('paintingEnabled').checked = part.paintingEnabled;
+    if (document.getElementById('paintingTime')) document.getElementById('paintingTime').value = part.paintingTime;
+    if (document.getElementById('compressorPower')) document.getElementById('compressorPower').value = part.compressorPower;
+    if (document.getElementById('paintChemistry')) document.getElementById('paintChemistry').value = part.paintChemistry;
+    if (document.getElementById('paintArea')) document.getElementById('paintArea').value = part.paintArea;
+    if (document.getElementById('failureRate')) document.getElementById('failureRate').value = part.failureRate;
+    if (document.getElementById('complexity')) document.getElementById('complexity').value = part.complexity;
+    
+    // Remove old part
+    currentParts = currentParts.filter(p => p.id !== partId);
+    renderPartsList();
+};
+
+window.renderPartsList = function() {
+    const partsList = document.getElementById('partsList');
+    if (!partsList) return;
+    
+    if (currentParts.length === 0) {
+        partsList.innerHTML = '<p class="empty-parts">Нет деталей. Добавьте детали в заказ.</p>';
+        return;
+    }
+    
+    partsList.innerHTML = currentParts.map(part => `
+        <div class="part-card" data-part-id="${part.id}">
+            <div class="part-info">
+                <strong>${part.name}</strong>
+                <span>× ${part.quantity}</span>
+                <span>₽${formatNumber(part.estimatedCost)}</span>
+            </div>
+            <div class="part-actions">
+                <button type="button" class="edit-part-btn" onclick="editPart('${part.id}')">✏️</button>
+                <button type="button" class="delete-part-btn" onclick="deletePart('${part.id}')">🗑️</button>
+            </div>
+        </div>
+    `).join('');
+};
+
+window.updateTotalOrderCost = function() {
+    const totalCost = currentParts.reduce((sum, part) => sum + (part.estimatedCost || 0), 0);
+    const totalOrderCost = document.getElementById('totalOrderCost');
+    if (totalOrderCost) {
+        totalOrderCost.textContent = `₽${formatNumber(totalCost)}`;
+    }
+};
+
+window.calculatePartCost = function(part) {
+    // Temporarily load part values into form to use existing calculateCost
+    // This is a temporary approach - should refactor calculateCost to accept parameters
+    const savedValues = {};
+    const fields = ['printType', 'quantity', 'printerCount', 'printerSelect', 'materialSelect', 
+                   'filamentType', 'filamentCost', 'partWeight', 'resinCost', 'partVolume',
+                   'printHours', 'printMinutes', 'electricityCost', 'printerWattage',
+                   'laborHourlyRate', 'postProcessingHours', 'dremelWearLevel', 'dremelConsumables',
+                   'paintingEnabled', 'paintingTime', 'compressorPower', 'paintChemistry',
+                   'paintArea', 'failureRate', 'complexity'];
+    
+    fields.forEach(field => {
+        const el = document.getElementById(field);
+        if (el) savedValues[field] = el.value;
+        if (el && part[field] !== undefined) el.value = part[field];
+    });
+    
+    // Calculate cost using existing function
+    calculateCost();
+    
+    // Get the calculated cost from the display
+    const totalCostElement = document.getElementById('totalCost');
+    const cost = totalCostElement ? parseFloat(totalCostElement.textContent.replace(/[₽,]/g, '')) || 0 : 0;
+    
+    // Restore saved values
+    fields.forEach(field => {
+        const el = document.getElementById(field);
+        if (el && savedValues[field] !== undefined) el.value = savedValues[field];
+    });
+    
+    return cost;
+};
 
 function calculateCost() {
     try {
