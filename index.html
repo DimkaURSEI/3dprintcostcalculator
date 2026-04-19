@@ -2,12 +2,50 @@
 layout: default
 ---
 <div class="calculator-box">
-  <h2>3D Print Cost Estimator</h2>
+  <h2>🖨️ 3D Print ERP Calculator</h2>
   
-  <!-- Material Settings -->
+  <!-- Print Type Toggle -->
   <div class="section-group">
-    <h3>Material Settings</h3>
+    <h3>Print Type</h3>
     <div class="input-group inline">
+      <label for="printType">Type:</label>
+      <select id="printType" onchange="togglePrintType()">
+        <option value="fdm">FDM (Filament)</option>
+        <option value="sla">SLA (Resin)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Equipment Settings (Depreciation & Rent) -->
+  <div class="section-group">
+    <h3>🔧 Equipment (Depreciation & Rent)</h3>
+    <div class="input-group inline">
+      <label for="equipmentCost">Equipment Cost:</label>
+      <div class="input-with-unit">
+        <input type="number" id="equipmentCost" value="1000" step="1">
+        <span class="unit">₽</span>
+      </div>
+    </div>
+    <div class="input-group inline">
+      <label for="equipmentLifespan">Equipment Lifespan:</label>
+      <div class="input-with-unit">
+        <input type="number" id="equipmentLifespan" value="10000" step="1">
+        <span class="unit">hours</span>
+      </div>
+    </div>
+    <div class="input-group inline">
+      <label for="monthlyRent">Monthly Rent:</label>
+      <div class="input-with-unit">
+        <input type="number" id="monthlyRent" value="15000" step="1">
+        <span class="unit">₽/month</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Material Settings -->
+  <div class="section-group" id="materialSection">
+    <h3>🧵 Material Settings</h3>
+    <div class="input-group inline fdm-only">
       <label for="filamentType">Filament Type:</label>
       <select id="filamentType" onchange="updateDefaultValues()">
         <option value="pla">PLA</option>
@@ -18,28 +56,52 @@ layout: default
       </select>
     </div>
     
-    <div class="input-group inline">
+    <div class="input-group inline fdm-only">
       <label for="filamentCost">Filament Cost (per kg):</label>
       <div class="input-with-unit">
-        <input type="number" id="filamentCost" value="20" step="0.01">
-        <span class="unit">$/kg</span>
+        <input type="number" id="filamentCost" value="2000" step="0.01">
+        <span class="unit">₽/kg</span>
       </div>
     </div>
 
-    <div class="input-group inline">
-      <label for="printWeight">Estimated Print Weight (g):</label>
+    <div class="input-group inline fdm-only">
+      <label for="printWeight">Print Weight:</label>
       <div class="input-with-unit">
         <input type="number" id="printWeight" value="100" step="0.1">
         <span class="unit">g</span>
+      </div>
+    </div>
+
+    <div class="input-group inline sla-only" style="display: none;">
+      <label for="resinCost">Resin Cost (per liter):</label>
+      <div class="input-with-unit">
+        <input type="number" id="resinCost" value="3000" step="0.01">
+        <span class="unit">₽/L</span>
+      </div>
+    </div>
+
+    <div class="input-group inline sla-only" style="display: none;">
+      <label for="printVolume">Print Volume:</label>
+      <div class="input-with-unit">
+        <input type="number" id="printVolume" value="50" step="0.1">
+        <span class="unit">ml</span>
+      </div>
+    </div>
+
+    <div class="input-group inline sla-only" style="display: none;">
+      <label for="alcoholCost">Isopropyl Alcohol (auto):</label>
+      <div class="input-with-unit">
+        <input type="number" id="alcoholCost" value="0" step="0.01" readonly>
+        <span class="unit">₽</span>
       </div>
     </div>
   </div>
 
   <!-- Time & Power Settings -->
   <div class="section-group">
-    <h3>Time & Power Settings</h3>
+    <h3>⚡ Time & Power Settings</h3>
     <div class="input-group inline">
-      <label for="printTime">Estimated Print Time:</label>
+      <label for="printTime">Print Time:</label>
       <div class="time-inputs">
         <input type="number" id="printHours" value="3" min="0" placeholder="Hours">
         <span>h</span>
@@ -51,23 +113,97 @@ layout: default
     <div class="input-group inline">
       <label for="electricityCost">Electricity Cost:</label>
       <div class="input-with-unit">
-        <input type="number" id="electricityCost" value="0.12" step="0.01">
-        <span class="unit">$/kWh</span>
+        <input type="number" id="electricityCost" value="5.47" step="0.01">
+        <span class="unit">₽/kWh</span>
       </div>
     </div>
 
     <div class="input-group inline">
-      <label for="printerWattage">Printer Power Usage:</label>
+      <label for="printerWattage">Printer Power:</label>
       <div class="input-with-unit">
-        <input type="number" id="printerWattage" value="150" step="1">
+        <input type="number" id="printerWattage" value="300" step="1">
         <span class="unit">W</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Work & Post-processing -->
+  <div class="section-group">
+    <h3>🔨 Work & Post-processing</h3>
+    <div class="input-group inline">
+      <label for="laborHourlyRate">Hourly Rate:</label>
+      <div class="input-with-unit">
+        <input type="number" id="laborHourlyRate" value="500" step="1">
+        <span class="unit">₽/h</span>
+      </div>
+    </div>
+    <div class="input-group inline">
+      <label for="postProcessingHours">Post-processing Time:</label>
+      <div class="input-with-unit">
+        <input type="number" id="postProcessingHours" value="1" step="0.5" min="0">
+        <span class="unit">h</span>
+      </div>
+    </div>
+    <div class="input-group inline">
+      <label for="dremelWearLevel">Dremel Wear Level:</label>
+      <select id="dremelWearLevel">
+        <option value="light">Light (+50₽)</option>
+        <option value="medium">Medium (+150₽)</option>
+        <option value="heavy">Heavy (+300₽)</option>
+      </select>
+    </div>
+    <div class="input-group inline">
+      <label for="dremelConsumables">Dremel Consumables:</label>
+      <div class="input-with-unit">
+        <input type="number" id="dremelConsumables" value="0" step="1">
+        <span class="unit">₽</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Painting Module -->
+  <div class="section-group">
+    <h3>🎨 Painting (Optional)</h3>
+    <div class="input-group inline">
+      <label for="paintingEnabled">Enable Painting:</label>
+      <input type="checkbox" id="paintingEnabled" onchange="togglePainting()">
+    </div>
+    <div id="paintingSection" style="display: none;">
+      <div class="input-group inline">
+        <label for="paintingTime">Painting Time:</label>
+        <div class="input-with-unit">
+          <input type="number" id="paintingTime" value="1" step="0.5" min="0">
+          <span class="unit">h</span>
+        </div>
+      </div>
+      <div class="input-group inline">
+        <label for="compressorPower">Compressor Power:</label>
+        <div class="input-with-unit">
+          <input type="number" id="compressorPower" value="500" step="1">
+          <span class="unit">W</span>
+        </div>
+      </div>
+      <div class="input-group inline">
+        <label for="paintChemistry">Chemistry (dyes, separators):</label>
+        <div class="input-with-unit">
+          <input type="number" id="paintChemistry" value="50" step="1">
+          <span class="unit">₽</span>
+        </div>
+      </div>
+      <div class="input-group inline">
+        <label for="paintSize">Part Size:</label>
+        <select id="paintSize" onchange="updatePaintCost()">
+          <option value="small">Small (+100₽)</option>
+          <option value="medium">Medium (+250₽)</option>
+          <option value="large">Large (+500₽)</option>
+        </select>
       </div>
     </div>
   </div>
 
   <!-- Additional Costs -->
   <div class="section-group">
-    <h3>Additional Costs</h3>
+    <h3>📊 Additional Costs</h3>
     <div class="input-group inline">
       <label for="failureRate">Failure Rate:</label>
       <div class="input-with-unit">
@@ -75,44 +211,53 @@ layout: default
         <span class="unit">%</span>
       </div>
     </div>
-
-    <div class="input-group inline">
-      <label for="laborCost">Labor Cost (per hour):</label>
-      <div class="input-with-unit">
-        <input type="number" id="laborCost" value="0" step="0.01">
-        <span class="unit">$/h</span>
-      </div>
-    </div>
   </div>
 
   <div class="button-group">
     <button onclick="calculateCost()" class="calculate-btn">Calculate Cost</button>
+    <button onclick="saveSettings()" class="save-btn">💾 Save Settings</button>
     <button onclick="resetForm()" class="reset-btn">Reset</button>
   </div>
 
   <div class="results" id="results">
-    <h3>Cost Breakdown</h3>
+    <h3>💰 Cost Breakdown</h3>
     <div class="cost-grid">
       <div class="cost-item">
         <label>Material:</label>
-        <span id="materialCost">$0.00</span>
+        <span id="materialCost">₽0.00</span>
+      </div>
+      <div class="cost-item">
+        <label>Equipment Depreciation:</label>
+        <span id="depreciationCost">₽0.00</span>
+      </div>
+      <div class="cost-item">
+        <label>Rent:</label>
+        <span id="rentCost">₽0.00</span>
       </div>
       <div class="cost-item">
         <label>Electricity:</label>
-        <span id="powerCost">$0.00</span>
+        <span id="powerCost">₽0.00</span>
+      </div>
+      <div class="cost-item">
+        <label>Work & Post-processing:</label>
+        <span id="laborCostResult">₽0.00</span>
+      </div>
+      <div class="cost-item">
+        <label>Dremel Wear:</label>
+        <span id="dremelWearCost">₽0.00</span>
+      </div>
+      <div class="cost-item">
+        <label>Painting:</label>
+        <span id="paintingCostResult">₽0.00</span>
       </div>
       <div class="cost-item">
         <label>Risk Cost:</label>
-        <span id="riskCost">$0.00</span>
-      </div>
-      <div class="cost-item">
-        <label>Labor:</label>
-        <span id="laborCostResult">$0.00</span>
+        <span id="riskCost">₽0.00</span>
       </div>
     </div>
     <div class="total-cost">
       <label>Total Cost:</label>
-      <span id="totalCost">$0.00</span>
+      <span id="totalCost">₽0.00</span>
     </div>
   </div>
 </div>
