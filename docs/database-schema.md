@@ -9,6 +9,7 @@ equipment/
     lifespan: number (hours)
     power: number (Watts)
     speed: number (mm/s, optional for future auto-calc)
+    filamentTypes: array of strings (e.g., ["PLA", "ABS", "PETG"])
 
 materials/
   {materialId}/
