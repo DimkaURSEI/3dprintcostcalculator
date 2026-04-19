@@ -191,6 +191,15 @@ body {
   background: rgba(37, 99, 235, 0.1);
 }
 
+.bottom-nav .nav-item:hover i,
+.bottom-nav .nav-item:hover span {
+  color: var(--text-primary);
+}
+
+.bottom-nav .nav-item:hover {
+  background: var(--bg-tertiary);
+}
+
 /* Header */
 .app-header {
   background: var(--bg-secondary);
