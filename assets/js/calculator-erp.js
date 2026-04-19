@@ -215,6 +215,10 @@ async function saveEquipment() {
         
         hideEquipmentForm();
         loadEquipment();
+        // Refresh printer dropdown
+        if (typeof populatePrinterDropdown === 'function') {
+          populatePrinterDropdown();
+        }
         alert('Оборудование сохранено!');
     } catch (error) {
         console.error('Error saving equipment:', error);
@@ -255,6 +259,10 @@ async function deleteEquipment(id) {
     try {
         await db.ref(`users/${currentUser.uid}/equipment/${id}`).remove();
         loadEquipment();
+        // Refresh printer dropdown
+        if (typeof populatePrinterDropdown === 'function') {
+          populatePrinterDropdown();
+        }
         alert('Оборудование удалено!');
     } catch (error) {
         console.error('Error deleting equipment:', error);
@@ -1036,8 +1044,18 @@ function calculateCost() {
         const printType = getString('printType');
         
         // Equipment costs
-        const equipmentCost = getValue('equipmentCost');
-        const equipmentLifespan = getValue('equipmentLifespan');
+        // Get printer data from selected printer or fallback to inputs
+        const printerSelect = document.getElementById('printerSelect');
+        let equipmentCost, equipmentLifespan;
+
+        if (printerSelect && printerSelect.value) {
+          equipmentCost = parseFloat(document.getElementById('selectedPrinterCost').value) || 0;
+          equipmentLifespan = parseFloat(document.getElementById('selectedPrinterLifespan').value) || 1;
+        } else {
+          equipmentCost = getValue('equipmentCost');
+          equipmentLifespan = getValue('equipmentLifespan');
+        }
+
         const monthlyRent = getValue('monthlyRent');
         
         // Material costs
@@ -1064,7 +1082,9 @@ function calculateCost() {
         const printHours = getValue('printHours');
         const printMinutes = getValue('printMinutes');
         const electricityCost = getValue('electricityCost');
-        const printerWattage = getValue('printerWattage');
+        const printerWattage = printerSelect && printerSelect.value
+          ? parseFloat(document.getElementById('selectedPrinterPower').value) || 300
+          : getValue('printerWattage');
 
         // Get printer count
         const printerCount = getValue('printerCount') || 1;

@@ -60,6 +60,9 @@ function initPremiumUI() {
   // Load global settings from Firebase (called after auth state changes in calculator-erp.js)
   // Note: loadGlobalSettings() is called in auth.onAuthStateChanged callback in calculator-erp.js
 
+  // Populate printer dropdown from equipment/
+  populatePrinterDropdown();
+
   // Add auto-save for tariffs and post-processing
   const tariffInputs = document.querySelectorAll('#monthlyRent, #monthlyHours, #electricityCost, #laborHourlyRate');
   tariffInputs.forEach(input => {
@@ -255,6 +258,50 @@ async function loadGlobalSettings() {
     }
   } catch (error) {
     console.error('Error loading global settings:', error);
+  }
+}
+
+async function populatePrinterDropdown() {
+  if (!currentUser) return;
+
+  const { db } = await getFirebase();
+
+  try {
+    const snapshot = await db.ref(`users/${currentUser.uid}/equipment`).once('value');
+    const equipment = snapshot.val();
+
+    const select = document.getElementById('printerSelect');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Выберите принтер</option>';
+
+    if (equipment) {
+      Object.entries(equipment).forEach(([id, item]) => {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = item.name;
+        option.dataset.cost = item.cost;
+        option.dataset.lifespan = item.lifespan;
+        option.dataset.power = item.power;
+        select.appendChild(option);
+      });
+    }
+  } catch (error) {
+    console.error('Error loading printers:', error);
+  }
+}
+
+function updatePrinterDefaults() {
+  const select = document.getElementById('printerSelect');
+  const selectedOption = select.options[select.selectedIndex];
+
+  if (selectedOption && selectedOption.value) {
+    document.getElementById('selectedPrinterCost').value = selectedOption.dataset.cost;
+    document.getElementById('selectedPrinterLifespan').value = selectedOption.dataset.lifespan;
+    document.getElementById('selectedPrinterPower').value = selectedOption.dataset.power;
+    if (typeof calculateCost === 'function') {
+      calculateCost();
+    }
   }
 }
 

@@ -230,6 +230,17 @@
             <input type="number" id="printerCount" value="1" min="1">
           </div>
 
+          <div class="input-group">
+            <label for="printerSelect">Принтер:</label>
+            <select id="printerSelect" onchange="updatePrinterDefaults()">
+              <option value="">Выберите принтер</option>
+            </select>
+          </div>
+
+          <input type="hidden" id="selectedPrinterCost">
+          <input type="hidden" id="selectedPrinterLifespan">
+          <input type="hidden" id="selectedPrinterPower">
+
           <!-- FDM Parameters -->
           <div class="fdm-section">
             <div class="input-group">
