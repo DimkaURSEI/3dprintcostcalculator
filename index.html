@@ -274,10 +274,15 @@
           </div>
 
           <div class="input-group">
-            <label for="printerSelect">Выберите принтеры (можно несколько):</label>
-            <select id="printerSelect" multiple onchange="updatePrinterDefaults()" style="height: 100px;">
+            <label for="printerCount">Количество принтеров для параллельной печати:</label>
+            <input type="number" id="printerCount" value="1" min="1">
+          </div>
+
+          <div class="input-group">
+            <label for="printerSelect">Выберите принтер:</label>
+            <select id="printerSelect" onchange="updatePrinterDefaults()">
+              <option value="">Выберите принтер</option>
             </select>
-            <small>Удерживайте Ctrl/Cmd для выбора нескольких принтеров</small>
           </div>
 
           <input type="hidden" id="selectedPrinterCost">
