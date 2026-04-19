@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Print ERP Calculator - Test</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/calculator.css">
+</head>
+<body style="background: #0f172a; color: #fff; padding: 20px;">
+  <div class="container">
+    <h1>🖨️ Тест калькулятора</h1>
+    <p>Это тестовая версия без Jekyll для локального тестирования</p>
+    
+    <div id="authSection" style="background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+      <h3>🔐 Авторизация</h3>
+      <input type="email" id="authEmail" placeholder="Email" style="display: block; margin-bottom: 10px; padding: 10px; width: 100%;">
+      <input type="password" id="authPassword" placeholder="Пароль" style="display: block; margin-bottom: 10px; padding: 10px; width: 100%;">
+      <button onclick="handleLogin(event)" style="padding: 10px 20px;">Войти</button>
+      <button onclick="handleRegister(event)" style="padding: 10px 20px; margin-left: 10px;">Зарегистрироваться</button>
+    </div>
+
+    <div id="calculatorSection" style="display: none;">
+      <div id="userInfo" style="background: #1e293b; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+        <span id="userEmail"></span>
+        <button onclick="handleLogout()" style="margin-left: 10px;">Выйти</button>
+      </div>
+
+      <div style="background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3>🔧 Оборудование</h3>
+        <div id="equipmentList" style="margin-bottom: 15px;"></div>
+        <button onclick="showAddEquipmentForm()" style="padding: 10px 20px;">➕ Добавить станок</button>
+        
+        <div id="equipmentForm" style="display: none; margin-top: 15px; padding: 15px; background: #2d3748; border-radius: 8px;">
+          <h4>Добавить станок</h4>
+          <input type="hidden" id="editingEquipmentId">
+          <input type="text" id="equipmentName" placeholder="Название" style="display: block; margin-bottom: 10px; padding: 10px; width: 100%;">
+          <input type="number" id="equipmentCost" placeholder="Стоимость (₽)" style="display: block; margin-bottom: 10px; padding: 10px; width: 100%;">
+          <input type="number" id="equipmentLifespan" placeholder="Ресурс (часов)" style="display: block; margin-bottom: 10px; padding: 10px; width: 100%;">
+          <input type="number" id="equipmentPower" placeholder="Мощность (Вт)" style="display: block; margin-bottom: 10px; padding: 10px; width: 100%;">
+          <input type="number" id="equipmentSpeed" placeholder="Скорость (мм/с)" style="display: block; margin-bottom: 10px; padding: 10px; width: 100%;">
+          <button onclick="saveEquipment()" style="padding: 10px 20px;">Сохранить</button>
+          <button onclick="hideEquipmentForm()" style="padding: 10px 20px; margin-left: 10px;">Отмена</button>
+        </div>
+      </div>
+
+      <div style="background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3>📁 Проекты</h3>
+        <div id="projectsList" style="margin-bottom: 15px;"></div>
+        <button onclick="showAddProjectForm()" style="padding: 10px 20px;">➕ Создать проект</button>
+        <button onclick="saveAsProject()" style="padding: 10px 20px; margin-left: 10px;">💾 Сохранить как проект</button>
+        
+        <div id="projectForm" style="display: none; margin-top: 15px; padding: 15px; background: #2d3748; border-radius: 8px;">
+          <h4>Создать проект</h4>
+          <input type="hidden" id="editingProjectId">
+          <input type="text" id="projectName" placeholder="Название проекта" style="display: block; margin-bottom: 10px; padding: 10px; width: 100%;">
+          <button onclick="saveProject()" style="padding: 10px 20px;">Сохранить</button>
+          <button onclick="hideProjectForm()" style="padding: 10px 20px; margin-left: 10px;">Отмена</button>
+        </div>
+      </div>
+
+      <div style="background: #1e293b; padding: 20px; border-radius: 8px;">
+        <h3>📊 Дополнительные расходы</h3>
+        <label>Сложность детали:</label>
+        <select id="complexity" style="padding: 10px; margin-left: 10px;">
+          <option value="1.0">Простая (1.0x)</option>
+          <option value="1.2">Средняя (1.2x)</option>
+          <option value="1.5">Сложная (1.5x)</option>
+          <option value="2.0">Очень сложная (2.0x)</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="status" style="background: #1e293b; padding: 20px; border-radius: 8px; margin-top: 20px;">
+      <h3>Статус Firebase</h3>
+      <p id="firebaseStatus">Загрузка...</p>
+    </div>
+  </div>
+
+  <script src="assets/js/firebase.js"></script>
+  <script src="assets/js/calculator-erp.js"></script>
+  <script>
+    // Test script
+    document.addEventListener('DOMContentLoaded', function() {
+      const statusEl = document.getElementById('firebaseStatus');
+      
+      // Test Firebase loading
+      setTimeout(async () => {
+        try {
+          const { firebase, auth, db } = await getFirebase();
+          statusEl.innerHTML = '✅ Firebase загружен успешно!<br>Auth: ' + (auth ? 'готов' : 'нет') + '<br>DB: ' + (db ? 'готова' : 'нет');
+          statusEl.style.color = '#4ade80';
+        } catch (error) {
+          statusEl.innerHTML = '❌ Ошибка Firebase: ' + error.message;
+          statusEl.style.color = '#f87171';
+        }
+      }, 2000);
+    });
+  </script>
+</body>
+</html>

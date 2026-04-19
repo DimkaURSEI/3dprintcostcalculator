@@ -16,10 +16,10 @@
       <!-- Load particles.js -->
       <script src="//cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
       
-      <!-- Load scripts with defer to prevent render blocking -->
-      <script src="{{ "/assets/js/firebase.js" | relative_url }}" defer></script>
-      <script src="{{ "/assets/js/main.js" | relative_url }}" defer></script>
-      <script src="{{ "/assets/js/calculator-erp.js" | relative_url }}" defer></script>
+      <!-- Load scripts without defer for onclick handlers -->
+      <script src="{{ "/assets/js/firebase.js" | relative_url }}"></script>
+      <script src="{{ "/assets/js/main.js" | relative_url }}"></script>
+      <script src="{{ "/assets/js/calculator-erp.js" | relative_url }}"></script>
       
       <!-- Bootstrap JS - load only after page is ready -->
       <script>
