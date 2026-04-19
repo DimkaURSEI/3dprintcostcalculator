@@ -4,6 +4,32 @@ layout: default
 <div class="calculator-box">
   <h2>🖨️ 3D Print ERP Calculator</h2>
   
+  <!-- Auth Section -->
+  <div class="section-group" id="authSection">
+    <h3>🔐 Authentication</h3>
+    <div class="input-group">
+      <label for="authEmail">Email:</label>
+      <input type="email" id="authEmail" placeholder="your@email.com">
+    </div>
+    <div class="input-group">
+      <label for="authPassword">Password:</label>
+      <input type="password" id="authPassword" placeholder="••••••••">
+    </div>
+    <div class="button-group">
+      <button onclick="handleLogin(event)" class="calculate-btn">Login</button>
+      <button onclick="handleRegister(event)" class="save-btn">Register</button>
+    </div>
+  </div>
+
+  <!-- User Info -->
+  <div class="section-group" id="userInfo" style="display: none;">
+    <span></span>
+    <button onclick="handleLogout()" class="reset-btn">Logout</button>
+  </div>
+
+  <!-- Calculator Section -->
+  <div id="calculatorSection" style="display: none;">
+  
   <!-- Print Type Toggle -->
   <div class="section-group">
     <h3>Print Type</h3>
@@ -216,9 +242,6 @@ layout: default
   <div class="button-group">
     <button onclick="calculateCost()" class="calculate-btn">Calculate Cost</button>
     <button onclick="saveSettings()" class="save-btn">💾 Save Settings</button>
-    <button onclick="showCloudConfig()" class="save-btn">☁️ Config Cloud</button>
-    <button onclick="saveToCloud()" class="save-btn">☁️ Save to Cloud</button>
-    <button onclick="loadFromCloud()" class="save-btn">☁️ Load from Cloud</button>
     <button onclick="resetForm()" class="reset-btn">Reset</button>
   </div>
 
@@ -262,5 +285,6 @@ layout: default
       <label>Total Cost:</label>
       <span id="totalCost">₽0.00</span>
     </div>
+  </div>
   </div>
 </div>

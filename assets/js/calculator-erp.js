@@ -7,17 +7,74 @@ const filamentDefaults = {
     custom: { cost: 2000, wattage: 300 }
 };
 
-// JSONBin.io sync functions
-async function saveToCloud() {
-    const apiKey = localStorage.getItem('jsonbinApiKey') || '';
-    const binId = localStorage.getItem('jsonbinBinId') || '';
-    
-    if (!apiKey || !binId) {
-        alert('Сначала настройте JSONBin.io:\n1. Зарегистрируйтесь на jsonbin.io\n2. Создайте новый bin\n3. Введите API Key и Bin ID в настройках');
-        return;
-    }
+// Firebase Auth functions
+let currentUser = null;
 
+async function initFirebase() {
+    const { auth } = await getFirebase();
+    
+    auth.onAuthStateChanged((user) => {
+        currentUser = user;
+        updateAuthUI();
+        
+        if (user) {
+            loadSettingsFromFirebase(user.uid);
+        }
+    });
+}
+
+async function handleLogin(e) {
+    e.preventDefault();
+    const { auth } = await getFirebase();
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+    
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+    } catch (error) {
+        alert('Ошибка входа: ' + error.message);
+    }
+}
+
+async function handleRegister(e) {
+    e.preventDefault();
+    const { auth } = await getFirebase();
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+    
+    try {
+        await auth.createUserWithEmailAndPassword(email, password);
+    } catch (error) {
+        alert('Ошибка регистрации: ' + error.message);
+    }
+}
+
+async function handleLogout() {
+    const { auth } = await getFirebase();
+    await auth.signOut();
+}
+
+function updateAuthUI() {
+    const authSection = document.getElementById('authSection');
+    const calculatorSection = document.getElementById('calculatorSection');
+    const userInfo = document.getElementById('userInfo');
+    
+    if (currentUser) {
+        authSection.style.display = 'none';
+        calculatorSection.style.display = 'block';
+        userInfo.style.display = 'block';
+        userInfo.textContent = `👤 ${currentUser.email}`;
+    } else {
+        authSection.style.display = 'block';
+        calculatorSection.style.display = 'none';
+        userInfo.style.display = 'none';
+    }
+}
+
+async function saveSettingsToFirebase(uid) {
+    const { db } = await getFirebase();
     const settings = {};
+    
     const inputs = document.querySelectorAll('input, select');
     inputs.forEach(input => {
         if (input.type === 'checkbox') {
@@ -28,45 +85,20 @@ async function saveToCloud() {
     });
 
     try {
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': apiKey,
-            },
-            body: JSON.stringify(settings),
-        });
-
-        if (response.ok) {
-            alert('Настройки сохранены в облаке!');
-        } else {
-            alert('Ошибка сохранения: ' + response.statusText);
-        }
+        await db.ref(`users/${uid}/settings`).set(settings);
     } catch (error) {
-        alert('Ошибка сети: ' + error.message);
+        console.error('Error saving to Firebase:', error);
     }
 }
 
-async function loadFromCloud() {
-    const apiKey = localStorage.getItem('jsonbinApiKey') || '';
-    const binId = localStorage.getItem('jsonbinBinId') || '';
+async function loadSettingsFromFirebase(uid) {
+    const { db } = await getFirebase();
     
-    if (!apiKey || !binId) {
-        alert('Сначала настройте JSONBin.io:\n1. Зарегистрируйтесь на jsonbin.io\n2. Создайте новый bin\n3. Введите API Key и Bin ID в настройках');
-        return;
-    }
-
     try {
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-            headers: {
-                'X-Master-Key': apiKey,
-            },
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            const settings = data.record;
-            
+        const snapshot = await db.ref(`users/${uid}/settings`).once('value');
+        const settings = snapshot.val();
+        
+        if (settings) {
             Object.entries(settings).forEach(([id, value]) => {
                 const element = document.getElementById(id);
                 if (element) {
@@ -87,31 +119,9 @@ async function loadFromCloud() {
             }
             
             calculateCost();
-            alert('Настройки загружены из облака!');
-        } else {
-            alert('Ошибка загрузки: ' + response.statusText);
         }
     } catch (error) {
-        alert('Ошибка сети: ' + error.message);
-    }
-}
-
-function showCloudConfig() {
-    const apiKey = localStorage.getItem('jsonbinApiKey') || '';
-    const binId = localStorage.getItem('jsonbinBinId') || '';
-    
-    const newApiKey = prompt('Введите API Key из JSONBin.io:', apiKey);
-    const newBinId = prompt('Введите Bin ID из JSONBin.io:', binId);
-    
-    if (newApiKey !== null) {
-        localStorage.setItem('jsonbinApiKey', newApiKey);
-    }
-    if (newBinId !== null) {
-        localStorage.setItem('jsonbinBinId', newBinId);
-    }
-    
-    if (newApiKey || newBinId) {
-        alert('Конфигурация JSONBin.io сохранена!');
+        console.error('Error loading from Firebase:', error);
     }
 }
 
@@ -131,6 +141,9 @@ const paintSizeCosts = {
 
 // Initialize the calculator
 function initCalculator() {
+    // Initialize Firebase
+    initFirebase();
+    
     // Load saved settings from LocalStorage
     loadSettings();
     
@@ -297,13 +310,18 @@ function saveSettings() {
     inputs.forEach(input => {
         if (input.type === 'checkbox') {
             settings[input.id] = input.checked;
-        } else if (input.type !== 'button') {
+        } else {
             settings[input.id] = input.value;
         }
     });
     
     // Save to LocalStorage
     localStorage.setItem('erpCalculatorSettings', JSON.stringify(settings));
+    
+    // Also save to Firebase if user is logged in
+    if (currentUser) {
+        saveSettingsToFirebase(currentUser.uid);
+    }
     
     // Show feedback
     alert('Настройки сохранены!');
