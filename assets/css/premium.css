@@ -168,6 +168,26 @@ body {
   gap: 16px;
 }
 
+/* Part Selection Styles */
+.part-card {
+  padding: 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.part-card:hover {
+  border-color: var(--primary);
+}
+
+.part-card.selected {
+  border-color: var(--primary);
+  background: rgba(37, 99, 235, 0.1);
+}
+
 .modal-content .button-group {
   display: flex;
   gap: 12px;
