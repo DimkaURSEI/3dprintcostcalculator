@@ -787,3 +787,44 @@ body {
   color: var(--text-muted);
   font-size: 0.75rem;
 }
+
+/* Station Cards */
+.station-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.station-card strong {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.station-card small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+}
+
+.drop-zone {
+  background: var(--bg-primary);
+  border: 2px dashed var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.drop-zone.drag-over {
+  border-color: var(--primary);
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.printer-card { border-left: 4px solid var(--primary); }
+.post-processing-card { border-left: 4px solid var(--warning); }
+.painting-card { border-left: 4px solid var(--success); }
