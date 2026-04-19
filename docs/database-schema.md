@@ -11,13 +11,11 @@ equipment/
     speed: number (mm/s, optional for future auto-calc)
     filamentTypes: array of strings (e.g., ["PLA", "ABS", "PETG"])
 
-materials/
-  {materialId}/
-    name: string
-    type: "FDM" | "SLA"
-    unit: "kg" | "liter"
+consumables/ (includes materials like filament/resin and other consumables)
+  {consumableId}/
+    name: string (e.g., "PLA", "ABS", "Изопропиловый спирт")
     cost: number (₽/unit)
-    power: number (Watts, optional - defaults to printer power)
+    unit: "kg" | "л" | "шт" | "мл" | "г"
 
 tariffs/
   monthlyRent: number (₽/month)
