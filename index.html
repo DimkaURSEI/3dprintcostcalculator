@@ -32,9 +32,17 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/solid.min.css" media="print" onload="this.media='all'">
   
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@firebase/app@0.6.6/firebase-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@firebase/auth@0.6.6/firebase-auth.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@firebase/database@0.6.6/firebase-database.js"></script>
+  
+  <!-- FullCalendar -->
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.js'></script>
+  <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/main.min.js'></script>
+  <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/resource-timeline@6.1.10/main.min.js'></script>
+  <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/resource-common@6.1.10/main.min.js'></script>
+  <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet'>
+  <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/resource-timeline@6.1.10/main.min.css' rel='stylesheet'>
 
   <!-- Favicon fix -->
   <link rel="icon" href="data:,">
@@ -275,6 +283,10 @@
             <label for="clientName">Клиент (опционально):</label>
             <input type="text" id="clientName" placeholder="Имя клиента">
           </div>
+          <div class="input-group">
+            <label for="orderComment">Комментарий:</label>
+            <textarea id="orderComment" rows="3" placeholder="Дополнительная информация о заказе"></textarea>
+          </div>
           <div class="parts-header">
             <h3>Детали в заказе</h3>
             <button type="button" class="add-part-btn" onclick="addPart()">+ Добавить деталь</button>
@@ -509,31 +521,38 @@
       </div>
     </header>
     <div class="erp-layout">
-      <aside class="orders-sidebar">
-        <div class="sidebar-header">
-          <h3>📋 Заказы</h3>
-          <button onclick="showCreateOrderModal()" class="add-order-btn">+ Новый заказ</button>
-        </div>
-        <div id="ordersList"></div>
-      </aside>
-
-      <aside class="parts-sidebar">
-        <div class="sidebar-header">
-          <h3>📐 Детали</h3>
-          <button onclick="clearOrderFilter()" class="clear-filter-btn" style="display: none;">✕ Сбросить фильтр</button>
-        </div>
-        <div id="partsList"></div>
-      </aside>
-
       <aside class="stations-sidebar">
         <h3>🖨️ Принтеры</h3>
         <div id="printersList" class="stations-list"></div>
 
-        <h3>🔧 Постобработка</h3>
+        <h3>� Постобработка</h3>
         <div id="postProcessingList" class="stations-list"></div>
 
         <h3>🎨 Покраска</h3>
         <div id="paintingList" class="stations-list"></div>
+      </aside>
+
+      <main class="timeline-container">
+        <div id="calendar"></div>
+      </main>
+
+      <aside class="order-parts-sidebar">
+        <div class="sidebar-header">
+          <h3>� Заказ</h3>
+          <button onclick="showCreateOrderModal()" class="add-order-btn">+ Новый</button>
+        </div>
+        <div class="input-group">
+          <select id="orderSelect" onchange="loadOrderParts()">
+            <option value="">Выберите заказ</option>
+          </select>
+        </div>
+        <div id="selectedOrderInfo" class="order-info" style="display: none;">
+          <p id="selectedOrderName"></p>
+          <p id="selectedOrderClient"></p>
+          <p id="selectedOrderComment"></p>
+        </div>
+        <h4>📐 Детали заказа</h4>
+        <div id="partsList"></div>
       </aside>
     </div>
 
@@ -548,6 +567,10 @@
         <div class="input-group">
           <label for="modalClientName">Клиент (опционально):</label>
           <input type="text" id="modalClientName" placeholder="Имя клиента">
+        </div>
+        <div class="input-group">
+          <label for="modalOrderComment">Комментарий:</label>
+          <textarea id="modalOrderComment" rows="3" placeholder="Дополнительная информация"></textarea>
         </div>
         <div class="button-group">
           <button onclick="createOrder()" class="primary-btn">Создать</button>

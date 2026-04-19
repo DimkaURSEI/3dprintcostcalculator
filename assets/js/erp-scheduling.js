@@ -1,98 +1,191 @@
+let calendar = null;
+
+async function initCalendar() {
+  const calendarEl = document.getElementById('calendar');
+  
+  calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'resourceTimelineDay',
+    schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+    resources: [],
+    events: [],
+    editable: true,
+    selectable: true,
+    droppable: true,
+    resourceAreaWidth: '20%',
+    resourceGroupField: 'group',
+    headerToolbar: {
+      left: 'today prev,next',
+      center: 'title',
+      right: 'resourceTimelineDay,resourceTimelineWeek'
+    },
+    slotDuration: '01:00',
+    slotLabelInterval: '01:00',
+    slotMinTime: '00:00',
+    slotMaxTime: '24:00',
+    height: '100%'
+  });
+  
+  calendar.render();
+  
+  // Initialize drop handling
+  initCalendarDrop();
+}
+
 async function loadERPData() {
   if (!currentUser) return;
   
   const { db } = await getFirebase();
   
-  // Load orders
+  // Initialize calendar if not already done
+  if (!calendar) {
+    await initCalendar();
+  }
+  
+  // Load orders for dropdown
   const ordersSnapshot = await db.ref(`users/${currentUser.uid}/orders`).once('value');
   const orders = ordersSnapshot.val();
-  renderOrdersSidebar(orders);
+  renderOrderDropdown(orders);
   
-  // Load orders and parts
-  const ordersSnapshot2 = await db.ref(`users/${currentUser.uid}/orders`).once('value');
-  const orders2 = ordersSnapshot2.val();
-  
-  // Collect all parts from all orders
-  let allParts = [];
-  if (orders2) {
-    for (const [orderId, order] of Object.entries(orders2)) {
-      const partsSnapshot = await db.ref(`users/${currentUser.uid}/orders/${orderId}/parts`).once('value');
-      const parts = partsSnapshot.val();
-      if (parts) {
-        Object.entries(parts).forEach(([partId, part]) => {
-          allParts.push({
-            id: partId,
-            orderId: orderId,
-            orderName: order.name,
-            ...part
-          });
-        });
-      }
-    }
-  }
-  renderPartsList(allParts);
+  // Load resources (stations)
+  const resources = [];
   
   // Load printers
   const printersSnapshot = await db.ref(`users/${currentUser.uid}/equipment`).once('value');
   const printers = printersSnapshot.val();
+  if (printers) {
+    Object.entries(printers).forEach(([id, item]) => {
+      resources.push({
+        id: `printer-${id}`,
+        group: 'Принтеры',
+        title: item.name,
+        type: 'printer',
+        stationId: id
+      });
+    });
+  }
+  
+  // Post-processing stations
+  resources.push({
+    id: 'post-processing-1',
+    group: 'Постобработка',
+    title: 'Постобработка 1',
+    type: 'post-processing',
+    stationId: '1'
+  });
+  
+  // Painting stations
+  resources.push({
+    id: 'painting-1',
+    group: 'Покраска',
+    title: 'Покраска 1',
+    type: 'painting',
+    stationId: '1'
+  });
+  
+  calendar.setOption('resources', resources);
+  
+  // Load assignments as events
+  const assignments = await loadAssignments();
+  const events = [];
+  
+  if (assignments) {
+    Object.entries(assignments).forEach(([assignmentId, assignment]) => {
+      const resourceId = assignment.printerId 
+        ? `printer-${assignment.printerId}`
+        : assignment.stationType === 'post-processing'
+          ? `post-processing-${assignment.stationId}`
+          : `painting-${assignment.stationId}`;
+      
+      // Calculate duration based on part parameters
+      const startTime = new Date(assignment.assignedAt);
+      const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000); // Default 2 hours
+      
+      events.push({
+        id: assignmentId,
+        resourceId: resourceId,
+        title: `${assignment.quantity} деталей`,
+        start: startTime.toISOString(),
+        end: endTime.toISOString(),
+        extendedProps: {
+          orderId: assignment.orderId,
+          partId: assignment.partId,
+          quantity: assignment.quantity
+        }
+      });
+    });
+  }
+  
+  calendar.setOption('events', events);
+  
+  // Render stations list (for reference)
   renderPrintersList(printers);
-  
-  // Load post-processing stations (default 1)
   renderPostProcessingStations();
-  
-  // Load painting stations (default 1)
   renderPaintingStations();
 }
 
-function renderOrdersSidebar(orders) {
-  const container = document.getElementById('ordersList');
-  if (!container) return;
+function renderOrderDropdown(orders) {
+  const select = document.getElementById('orderSelect');
+  if (!select) return;
   
-  container.innerHTML = '';
+  select.innerHTML = '<option value="">Выберите заказ</option>';
   
   if (!orders || Object.keys(orders).length === 0) {
-    container.innerHTML = '<p style="color: #666;">Нет заказов</p>';
     return;
   }
   
-  Object.entries(orders).forEach(([orderId, order]) => {
-    const div = document.createElement('div');
-    div.className = 'order-sidebar-item';
-    div.dataset.orderId = orderId;
-    div.innerHTML = `
-      <strong>${order.name}</strong>
-      ${order.clientName ? `<small>${order.clientName}</small>` : ''}
-      <small>₽${order.totalCost || 0}</small>
-    `;
-    div.addEventListener('click', () => filterPartsByOrder(orderId));
-    container.appendChild(div);
+  Object.entries(orders).forEach(([id, order]) => {
+    const option = document.createElement('option');
+    option.value = id;
+    option.textContent = order.name;
+    select.appendChild(option);
   });
 }
 
-let currentFilterOrderId = null;
-
-function filterPartsByOrder(orderId) {
-  currentFilterOrderId = orderId;
-  loadERPData(); // Reload with filter
+async function loadOrderParts() {
+  const orderId = document.getElementById('orderSelect').value;
+  if (!orderId) {
+    document.getElementById('selectedOrderInfo').style.display = 'none';
+    renderPartsList([]);
+    return;
+  }
   
-  // Show clear filter button
-  const clearBtn = document.querySelector('.clear-filter-btn');
-  if (clearBtn) clearBtn.style.display = 'block';
-}
-
-function clearOrderFilter() {
-  currentFilterOrderId = null;
-  loadERPData();
+  const { db } = await getFirebase();
   
-  // Hide clear filter button
-  const clearBtn = document.querySelector('.clear-filter-btn');
-  if (clearBtn) clearBtn.style.display = 'none';
+  // Load order info
+  const orderSnapshot = await db.ref(`users/${currentUser.uid}/orders/${orderId}`).once('value');
+  const order = orderSnapshot.val();
+  
+  if (order) {
+    document.getElementById('selectedOrderInfo').style.display = 'block';
+    document.getElementById('selectedOrderName').textContent = order.name;
+    document.getElementById('selectedOrderClient').textContent = order.clientName ? `Клиент: ${order.clientName}` : '';
+    document.getElementById('selectedOrderComment').textContent = order.comment || '';
+  }
+  
+  // Load parts
+  const partsSnapshot = await db.ref(`users/${currentUser.uid}/orders/${orderId}/parts`).once('value');
+  const parts = partsSnapshot.val();
+  
+  const partsList = [];
+  if (parts) {
+    Object.entries(parts).forEach(([partId, part]) => {
+      partsList.push({
+        id: partId,
+        orderId: orderId,
+        orderName: order.name,
+        ...part
+      });
+    });
+  }
+  
+  renderPartsList(partsList);
 }
 
 window.showCreateOrderModal = function() {
   document.getElementById('orderModal').style.display = 'block';
   document.getElementById('modalOrderName').value = '';
   document.getElementById('modalClientName').value = '';
+  document.getElementById('modalOrderComment').value = '';
 };
 
 window.hideCreateOrderModal = function() {
@@ -102,6 +195,7 @@ window.hideCreateOrderModal = function() {
 window.createOrder = async function() {
   const orderName = document.getElementById('modalOrderName').value;
   const clientName = document.getElementById('modalClientName').value;
+  const orderComment = document.getElementById('modalOrderComment').value;
   
   if (!orderName) {
     alert('Введите название заказа');
@@ -114,6 +208,7 @@ window.createOrder = async function() {
   const orderData = {
     name: orderName,
     clientName: clientName || '',
+    comment: orderComment || '',
     createdAt: Date.now(),
     status: 'pending',
     totalCost: 0
@@ -122,7 +217,12 @@ window.createOrder = async function() {
   await db.ref(`users/${currentUser.uid}/orders/${orderId}`).set(orderData);
   
   hideCreateOrderModal();
-  loadERPData();
+  
+  // Refresh order dropdown
+  const ordersSnapshot = await db.ref(`users/${currentUser.uid}/orders`).once('value');
+  const orders = ordersSnapshot.val();
+  renderOrderDropdown(orders);
+  
   alert('Заказ создан!');
 };
 
@@ -137,17 +237,7 @@ function renderPartsList(parts) {
     return;
   }
   
-  // Filter by order if filter is set
-  const filteredParts = currentFilterOrderId 
-    ? parts.filter(p => p.orderId === currentFilterOrderId)
-    : parts;
-  
-  if (filteredParts.length === 0) {
-    container.innerHTML = '<p style="color: #666;">Нет деталей</p>';
-    return;
-  }
-  
-  filteredParts.forEach(part => {
+  parts.forEach(part => {
     const div = document.createElement('div');
     div.className = 'order-card';
     div.draggable = true;
@@ -160,9 +250,9 @@ function renderPartsList(parts) {
     
     div.innerHTML = `
       <div class="order-info">
-        <strong>${part.orderName}</strong>
-        <div>${part.name}</div>
-        <div>Всего: ${part.quantity} | Назначено: ${part.assignedQuantity || 0} | Осталось: ${remaining}</div>
+        <strong>${part.name}</strong>
+        <div>× ${part.quantity}</div>
+        <div>Назначено: ${part.assignedQuantity || 0} | Осталось: ${remaining}</div>
         <div>${part.filamentType || part.materialType}</div>
       </div>
     `;
@@ -392,4 +482,88 @@ async function handleDrop(e) {
     console.error('Error in handleDrop:', error);
     alert('Ошибка: ' + error.message);
   }
+}
+
+// FullCalendar drop handling
+function initCalendarDrop() {
+  if (!calendar) return;
+  
+  calendar.on('drop', async function(info) {
+    const partId = info.draggedEl.dataset.partId;
+    const orderId = info.draggedEl.dataset.orderId;
+    const resourceId = info.resource.id;
+    
+    // Extract station info from resourceId
+    const resource = calendar.getResourceById(resourceId);
+    const stationType = resource.extendedProps.type;
+    const stationId = resource.extendedProps.stationId;
+    
+    // Get part data
+    const { db } = await getFirebase();
+    const partSnapshot = await db.ref(`users/${currentUser.uid}/orders/${orderId}/parts/${partId}`).once('value');
+    const part = partSnapshot.val();
+    
+    if (!part) {
+      alert('Деталь не найдена');
+      info.revert();
+      return;
+    }
+    
+    // If quantity is 1, assign automatically
+    if (part.quantity === 1) {
+      await saveAssignment(orderId, partId, stationType, stationId, 1);
+      loadERPData();
+      alert(`Назначено: 1 деталь на ${resource.title}`);
+      return;
+    }
+    
+    // Prompt for quantity
+    const quantity = prompt(`Сколько деталей "${part.name}" (доступно: ${part.quantity}) на ${resource.title}?`, part.quantity);
+    
+    if (quantity === null) {
+      info.revert();
+      return;
+    }
+    
+    let qty;
+    if (quantity.toLowerCase() === 'все' || quantity.toLowerCase() === 'all') {
+      qty = part.quantity;
+    } else {
+      qty = parseInt(quantity);
+    }
+    
+    if (isNaN(qty) || qty <= 0) {
+      alert('Некорректное количество');
+      info.revert();
+      return;
+    }
+    
+    if (qty > part.quantity) {
+      alert(`Недостаточно деталей. Доступно: ${part.quantity}`);
+      info.revert();
+      return;
+    }
+    
+    // Save assignment
+    await saveAssignment(orderId, partId, stationType, stationId, qty);
+    
+    // Update event on calendar
+    const startTime = new Date(info.dateStr);
+    const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000); // Default 2 hours
+    
+    calendar.addEvent({
+      resourceId: resourceId,
+      title: `${qty} деталей`,
+      start: startTime.toISOString(),
+      end: endTime.toISOString(),
+      extendedProps: {
+        orderId: orderId,
+        partId: partId,
+        quantity: qty
+      }
+    });
+    
+    loadERPData();
+    alert(`Назначено: ${qty} деталей на ${resource.title}`);
+  });
 }

@@ -71,6 +71,7 @@ orders/ (new structure)
   {orderId}/
     name: string
     clientName: string (optional)
+    comment: string (optional)
     createdAt: timestamp
     status: "pending" | "in_progress" | "completed"
   {orderId}/parts/{partId}/

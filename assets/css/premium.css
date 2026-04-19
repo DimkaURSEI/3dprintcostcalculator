@@ -590,6 +590,96 @@ body {
 }
 
 /* ERP Order Management */
+.erp-layout {
+  display: grid;
+  grid-template-columns: 250px 1fr 300px;
+  gap: 20px;
+  height: calc(100vh - 140px);
+}
+
+.stations-sidebar {
+  overflow-y: auto;
+}
+
+.timeline-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+#calendar {
+  height: 100%;
+}
+
+.order-parts-sidebar {
+  overflow-y: auto;
+}
+
+.order-info p {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 4px 0;
+}
+
+.order-info p:first-child {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* FullCalendar Customization */
+.fc {
+  font-family: 'Inter', sans-serif;
+}
+
+.fc-toolbar-title {
+  color: var(--text-primary) !important;
+}
+
+.fc-button {
+  background: var(--bg-primary) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+.fc-button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.fc-col-header-cell {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border) !important;
+}
+
+.fc-col-header-cell-cushion {
+  color: var(--text-secondary) !important;
+}
+
+.fc-timegrid-slot {
+  border-color: var(--border) !important;
+}
+
+.fc-daygrid-day {
+  background: var(--bg-primary) !important;
+}
+
+.fc-resource-area {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border) !important;
+}
+
+.fc-resource-area-header {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border) !important;
+}
+
+.fc-timeline-event {
+  background: var(--primary) !important;
+  border: none !important;
+  border-radius: 4px !important;
+}
+
 .sidebar-header {
   display: flex;
   justify-content: space-between;

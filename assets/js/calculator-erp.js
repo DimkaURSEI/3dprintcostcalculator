@@ -489,6 +489,7 @@ async function saveProject() {
     const editingId = document.getElementById('editingProjectId').value;
     const orderName = document.getElementById('orderName').value;
     const clientName = document.getElementById('clientName').value;
+    const orderComment = document.getElementById('orderComment').value;
     
     if (!orderName) {
         alert('Введите название заказа');
@@ -512,6 +513,7 @@ async function saveProject() {
     const orderData = {
         name: orderName,
         clientName: clientName || '',
+        comment: orderComment || '',
         createdAt: editingId ? (await db.ref(`users/${currentUser.uid}/orders/${orderId}/createdAt`).once('value')).val() : Date.now(),
         status: 'pending',
         totalCost: totalOrderCost
@@ -554,6 +556,7 @@ async function loadOrder(id) {
             currentOrderId = id;
             document.getElementById('orderName').value = order.name || '';
             document.getElementById('clientName').value = order.clientName || '';
+            document.getElementById('orderComment').value = order.comment || '';
             document.getElementById('editingProjectId').value = id;
             
             // Load parts
