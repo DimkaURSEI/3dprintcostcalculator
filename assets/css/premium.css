@@ -39,7 +39,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(0, 0, 0, 0.9) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,18 +49,87 @@ body {
 
 .modal-content {
   background: var(--bg-secondary);
-  padding: 40px;
-  border-radius: 16px;
-  max-width: 400px;
+  padding: 48px;
+  border-radius: 20px;
+  max-width: 420px;
   width: 100%;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border);
 }
 
 .modal-content h2 {
   text-align: center;
-  margin-bottom: 30px;
-  font-size: 1.5rem;
+  margin-bottom: 32px;
+  font-size: 1.75rem;
   color: var(--text-primary);
+  font-weight: 700;
+}
+
+.modal-content .input-group {
+  margin-bottom: 24px;
+}
+
+.modal-content .input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.modal-content .input-group input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.modal-content .input-group input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.modal-content .button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.modal-content .primary-btn,
+.modal-content .secondary-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.modal-content .primary-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+
+.modal-content .primary-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+.modal-content .secondary-btn {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.modal-content .secondary-btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--text-muted);
 }
 
 /* App Container */
