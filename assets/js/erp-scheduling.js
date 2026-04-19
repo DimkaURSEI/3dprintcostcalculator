@@ -70,3 +70,39 @@ function renderPrintersList(printers) {
     container.appendChild(div);
   });
 }
+
+function renderPostProcessingStations() {
+  const container = document.getElementById('postProcessingList');
+  if (!container) return;
+  
+  container.innerHTML = `
+    <div class="station-card post-processing-card">
+      <strong>Постобработка 1</strong>
+      <small>Статус: available</small>
+      <div class="drop-zone" data-station-type="post-processing" data-station-id="1">📥 Перетащите заказ</div>
+    </div>
+  `;
+  
+  // Add drop event listeners
+  const dropZone = container.querySelector('.drop-zone');
+  dropZone.addEventListener('dragover', handleDragOver);
+  dropZone.addEventListener('drop', handleDrop);
+}
+
+function renderPaintingStations() {
+  const container = document.getElementById('paintingList');
+  if (!container) return;
+  
+  container.innerHTML = `
+    <div class="station-card painting-card">
+      <strong>Покраска 1</strong>
+      <small>Статус: available</small>
+      <div class="drop-zone" data-station-type="painting" data-station-id="1">📥 Перетащите заказ</div>
+    </div>
+  `;
+  
+  // Add drop event listeners
+  const dropZone = container.querySelector('.drop-zone');
+  dropZone.addEventListener('dragover', handleDragOver);
+  dropZone.addEventListener('drop', handleDrop);
+}
