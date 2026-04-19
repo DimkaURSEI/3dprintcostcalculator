@@ -120,240 +120,252 @@
 
     <!-- Main Content Grid -->
     <div class="main-grid">
-
-      <!-- Main Working Area -->
-      <main class="working-area">
-        <!-- Order Info -->
-        <section class="card">
-          <h2>📦 Заказ</h2>
-          <div class="input-group">
-            <label for="orderName">Название заказа:</label>
-            <input type="text" id="orderName" placeholder="Название заказа">
-          </div>
-          <div class="input-group">
-            <label for="clientName">Клиент (опционально):</label>
-            <input type="text" id="clientName" placeholder="Имя клиента">
-          </div>
-          <div class="input-group">
-            <label for="orderComment">Комментарий:</label>
-            <textarea id="orderComment" rows="3" placeholder="Дополнительная информация о заказе"></textarea>
-          </div>
-          <div class="parts-header">
-            <h3>Детали в заказе</h3>
-            <button type="button" class="add-part-btn" onclick="addPart()">+ Добавить деталь</button>
-          </div>
-          <div id="partsList" class="parts-list"></div>
-          <div class="total-cost-display">
-            <span>Итого по заказу:</span>
-            <span id="totalOrderCost">₽0</span>
-          </div>
-        </section>
-
-        <!-- Part Parameters -->
-        <section class="card">
-          <h2>📐 Параметры детали</h2>
-
-          <div class="input-group">
-            <label for="quantity">Количество деталей (шт):</label>
-            <input type="number" id="quantity" value="1" min="1">
-          </div>
-
-          <div class="input-group">
-            <label for="printerCount">Количество принтеров для параллельной печати:</label>
-            <input type="number" id="printerCount" value="1" min="1">
-          </div>
-
-          <div class="input-group">
-            <label for="printerSelect">Выберите принтер:</label>
-            <select id="printerSelect" onchange="updatePrinterDefaults()">
-              <option value="">Выберите принтер</option>
-            </select>
-          </div>
-
-          <input type="hidden" id="selectedPrinterCost">
-          <input type="hidden" id="selectedPrinterLifespan">
-          <input type="hidden" id="selectedPrinterPower">
-
-          <div class="input-group">
-            <label for="materialSelect">Выберите материал:</label>
-            <select id="materialSelect" onchange="updateMaterialDefaults()">
-              <option value="">Выберите материал</option>
-            </select>
-          </div>
-
-          <input type="hidden" id="materialCost">
-          <input type="hidden" id="materialPower">
-          <input type="hidden" id="materialType">
-
-          <!-- FDM Parameters (shown when no material selected or material type is FDM) -->
-          <div class="fdm-section" id="fdmSection">
+      <div class="calculator-layout">
+        <!-- Left: Order and Parts List -->
+        <aside class="calculator-left">
+          <h3>📦 Заказ и детали</h3>
+          
+          <!-- Order Info -->
+          <div class="order-info-panel">
             <div class="input-group">
-              <label>Тип филамента (если не выбран материал):</label>
-              <select id="filamentType" onchange="updateDefaultValues()">
-                <option value="pla">PLA</option>
-                <option value="abs">ABS</option>
-                <option value="petg">PETG</option>
-                <option value="tpu">TPU</option>
-                <option value="custom">Другой</option>
+              <label>Название заказа:</label>
+              <input type="text" id="orderName" placeholder="Заказ клиента Иванов">
+            </div>
+            <div class="input-group">
+              <label>Клиент:</label>
+              <input type="text" id="clientName" placeholder="Имя клиента">
+            </div>
+            <div class="input-group">
+              <label>Комментарий:</label>
+              <textarea id="orderComment" rows="2" placeholder="Дополнительная информация"></textarea>
+            </div>
+          </div>
+          
+          <!-- Parts List -->
+          <div class="parts-list-panel">
+            <div class="panel-header">
+              <h4>📐 Детали</h4>
+              <button onclick="addPart()" class="add-part-btn">+ Добавить</button>
+            </div>
+            <div id="partsList" class="parts-list"></div>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <button onclick="saveProject()" class="primary-btn">💾 Сохранить заказ</button>
+            <button onclick="switchTab('erp')" class="secondary-btn">📋 Перейти в ERP</button>
+          </div>
+        </aside>
+        
+        <!-- Middle: Parameters Form -->
+        <main class="calculator-middle">
+          <h3>⚙️ Параметры детали</h3>
+          <div id="partParameters" class="part-parameters">
+            <div class="input-group">
+              <label for="quantity">Количество деталей (шт):</label>
+              <input type="number" id="quantity" value="1" min="1">
+            </div>
+
+            <div class="input-group">
+              <label for="printerCount">Количество принтеров для параллельной печати:</label>
+              <input type="number" id="printerCount" value="1" min="1">
+            </div>
+
+            <div class="input-group">
+              <label for="printerSelect">Выберите принтер:</label>
+              <select id="printerSelect" onchange="updatePrinterDefaults()">
+                <option value="">Выберите принтер</option>
               </select>
             </div>
-            <div class="input-group">
-              <label>Стоимость филамента (₽/кг):</label>
-              <input type="number" id="filamentCost" value="2000">
-            </div>
-            <div class="input-group">
-              <label>Вес детали (г):</label>
-              <input type="number" id="partWeight" value="100">
-            </div>
-          </div>
 
-          <!-- SLA Parameters (shown when no material selected or material type is SLA) -->
-          <div class="sla-section" id="slaSection" style="display: none;">
+            <input type="hidden" id="selectedPrinterCost">
+            <input type="hidden" id="selectedPrinterLifespan">
+            <input type="hidden" id="selectedPrinterPower">
+
             <div class="input-group">
-              <label>Тип смолы (если не выбран материал):</label>
-              <select id="resinType" onchange="updateDefaultValues()">
-                <option value="standard">Стандартная</option>
-                <option value="tough">Прочная</option>
-                <option value="flexible">Гибкая</option>
-                <option value="dental">Зубная</option>
-                <option value="custom">Другая</option>
+              <label for="materialSelect">Выберите материал:</label>
+              <select id="materialSelect" onchange="updateMaterialDefaults()">
+                <option value="">Выберите материал</option>
               </select>
             </div>
-            <div class="input-group">
-              <label>Стоимость смолы (₽/литр):</label>
-              <input type="number" id="resinCost" value="3000">
-            </div>
-            <div class="input-group">
-              <label>Объём детали (мл):</label>
-              <input type="number" id="partVolume" value="50">
-            </div>
-          </div>
 
-          <!-- Time Parameters -->
-          <div class="time-inputs">
-            <div class="input-group">
-              <label>Время печати:</label>
-              <div class="time-row">
-                <input type="number" id="printHours" value="3" min="0" placeholder="ч">
-                <span>ч</span>
-                <input type="number" id="printMinutes" value="0" min="0" max="59" placeholder="мин">
-                <span>мин</span>
+            <input type="hidden" id="materialCost">
+            <input type="hidden" id="materialPower">
+            <input type="hidden" id="materialType">
+
+            <!-- FDM Parameters -->
+            <div class="fdm-section" id="fdmSection">
+              <div class="input-group">
+                <label>Тип филамента:</label>
+                <select id="filamentType" onchange="updateDefaultValues()">
+                  <option value="pla">PLA</option>
+                  <option value="abs">ABS</option>
+                  <option value="petg">PETG</option>
+                  <option value="tpu">TPU</option>
+                  <option value="custom">Другой</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label>Стоимость филамента (₽/кг):</label>
+                <input type="number" id="filamentCost" value="2000">
+              </div>
+              <div class="input-group">
+                <label>Вес детали (г):</label>
+                <input type="number" id="partWeight" value="100">
               </div>
             </div>
-          </div>
 
-          <!-- Complexity -->
-          <div class="input-group">
-            <label>Сложность детали:</label>
-            <select id="complexity">
-              <option value="1.0">Простая (1.0x)</option>
-              <option value="1.2">Средняя (1.2x)</option>
-              <option value="1.5">Сложная (1.5x)</option>
-              <option value="2.0">Очень сложная (2.0x)</option>
-            </select>
-          </div>
-
-          <!-- Post-processing -->
-          <div class="input-group">
-            <label>Постобработка (часы):</label>
-            <input type="number" id="postProcessingHours" value="1">
-          </div>
-
-          <div class="input-group">
-            <label for="postProcessingLevel">Уровень постобработки:</label>
-            <select id="postProcessingLevel">
-              <option value="light">Лёгкий</option>
-              <option value="medium">Средний</option>
-              <option value="heavy">Сильный</option>
-            </select>
-          </div>
-
-          <!-- Painting -->
-          <div class="checkbox-group">
-            <label>
-              <input type="checkbox" id="paintingEnabled" onchange="togglePainting()">
-              Покраска
-            </label>
-          </div>
-          <div id="paintingSection" style="display: none;">
-            <div class="input-group">
-              <label>Время покраски (часы):</label>
-              <input type="number" id="paintingTime" value="1">
+            <!-- SLA Parameters -->
+            <div class="sla-section" id="slaSection" style="display: none;">
+              <div class="input-group">
+                <label>Тип смолы:</label>
+                <select id="resinType" onchange="updateDefaultValues()">
+                  <option value="standard">Стандартная</option>
+                  <option value="tough">Прочная</option>
+                  <option value="flexible">Гибкая</option>
+                  <option value="dental">Зубная</option>
+                  <option value="custom">Другая</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label>Стоимость смолы (₽/литр):</label>
+                <input type="number" id="resinCost" value="3000">
+              </div>
+              <div class="input-group">
+                <label>Объём детали (мл):</label>
+                <input type="number" id="partVolume" value="50">
+              </div>
             </div>
-            <div class="input-group">
-              <label>Мощность компрессора (Вт):</label>
-              <input type="number" id="compressorPower" value="500">
+
+            <!-- Time Parameters -->
+            <div class="time-inputs">
+              <div class="input-group">
+                <label>Время печати:</label>
+                <div class="time-row">
+                  <input type="number" id="printHours" value="3" min="0" placeholder="ч">
+                  <span>ч</span>
+                  <input type="number" id="printMinutes" value="0" min="0" max="59" placeholder="мин">
+                  <span>мин</span>
+                </div>
+              </div>
             </div>
+
+            <!-- Complexity -->
             <div class="input-group">
-              <label>Химия (₽):</label>
-              <input type="number" id="paintChemistry" value="50">
+              <label>Сложность детали:</label>
+              <select id="complexity">
+                <option value="1.0">Простая (1.0x)</option>
+                <option value="1.2">Средняя (1.2x)</option>
+                <option value="1.5">Сложная (1.5x)</option>
+                <option value="2.0">Очень сложная (2.0x)</option>
+              </select>
             </div>
+
+            <!-- Post-processing -->
             <div class="input-group">
-              <label>Площадь детали (см²):</label>
-              <input type="number" id="paintArea" value="100" min="0" step="1">
+              <label>Постобработка (часы):</label>
+              <input type="number" id="postProcessingHours" value="1">
+            </div>
+
+            <div class="input-group">
+              <label for="postProcessingLevel">Уровень постобработки:</label>
+              <select id="postProcessingLevel">
+                <option value="light">Лёгкий</option>
+                <option value="medium">Средний</option>
+                <option value="heavy">Сильный</option>
+              </select>
+            </div>
+
+            <!-- Painting -->
+            <div class="checkbox-group">
+              <label>
+                <input type="checkbox" id="paintingEnabled" onchange="togglePainting()">
+                Покраска
+              </label>
+            </div>
+            <div id="paintingSection" style="display: none;">
+              <div class="input-group">
+                <label>Время покраски (часы):</label>
+                <input type="number" id="paintingTime" value="1">
+              </div>
+              <div class="input-group">
+                <label>Мощность компрессора (Вт):</label>
+                <input type="number" id="compressorPower" value="500">
+              </div>
+              <div class="input-group">
+                <label>Химия (₽):</label>
+                <input type="number" id="paintChemistry" value="50">
+              </div>
+              <div class="input-group">
+                <label>Площадь детали (см²):</label>
+                <input type="number" id="paintArea" value="100" min="0" step="1">
+              </div>
+            </div>
+
+            <!-- Risk -->
+            <div class="input-group">
+              <label>Риск брака (%):</label>
+              <input type="number" id="failureRate" value="10">
+            </div>
+            
+            <div class="action-buttons">
+              <button onclick="calculateCost()" class="primary-btn">Рассчитать</button>
+              <button onclick="resetForm()" class="secondary-btn">� Сбросить</button>
             </div>
           </div>
-
-          <!-- Risk -->
-          <div class="input-group">
-            <label>Риск брака (%):</label>
-            <input type="number" id="failureRate" value="10">
+        </main>
+        
+        <!-- Right: Calculated Results -->
+        <aside class="calculator-right">
+          <h3>💰 Результаты</h3>
+          <div id="resultsPanel" class="results-panel">
+            <div class="result-item">
+              <span class="label">Материал</span>
+              <span class="value" id="materialCostResult">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Амортизация</span>
+              <span class="value" id="depreciationCost">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Аренда</span>
+              <span class="value" id="rentCost">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Электричество</span>
+              <span class="value" id="powerCost">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Работа</span>
+              <span class="value" id="laborCostResult">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Постобработка</span>
+              <span class="value" id="dremelWearCost">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Покраска</span>
+              <span class="value" id="paintingCostResult">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Риск брака</span>
+              <span class="value" id="riskCost">₽0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Сложность</span>
+              <span class="value" id="complexityCost">₽0.00</span>
+            </div>
+            <div class="result-item total">
+              <span class="label">ИТОГО</span>
+              <span class="value" id="totalCost">₽0.00</span>
+            </div>
+            <div class="total-cost-display">
+              <span>Итого по заказу:</span>
+              <span id="totalOrderCost">₽0</span>
+            </div>
           </div>
-        </section>
-
-        <!-- Action Buttons -->
-        <div class="action-bar">
-          <button onclick="calculateCost()" class="primary-btn large">Рассчитать</button>
-          <button onclick="saveAsProject()" class="secondary-btn large">💾 Сохранить как проект</button>
-          <button onclick="resetForm()" class="reset-btn large">🔄 Сбросить</button>
-        </div>
-      </main>
-
-      <!-- Sticky Results Panel -->
-      <aside class="results-panel">
-        <h3>💰 Результаты</h3>
-        <div class="result-item">
-          <span class="label">Материал</span>
-          <span class="value" id="materialCost">₽0.00</span>
-        </div>
-        <div class="result-item">
-          <span class="label">Амортизация</span>
-          <span class="value" id="depreciationCost">₽0.00</span>
-        </div>
-        <div class="result-item">
-          <span class="label">Аренда</span>
-          <span class="value" id="rentCost">₽0.00</span>
-        </div>
-        <div class="result-item">
-          <span class="label">Электричество</span>
-          <span class="value" id="powerCost">₽0.00</span>
-        </div>
-        <div class="result-item">
-          <span class="label">Работа</span>
-          <span class="value" id="laborCostResult">₽0.00</span>
-        </div>
-        <div class="result-item">
-          <span class="label">Постобработка</span>
-          <span class="value" id="dremelWearCost">₽0.00</span>
-        </div>
-        <div class="result-item">
-          <span class="label">Покраска</span>
-          <span class="value" id="paintingCostResult">₽0.00</span>
-        </div>
-        <div class="result-item">
-          <span class="label">Риск брака</span>
-          <span class="value" id="riskCost">₽0.00</span>
-        </div>
-        <div class="result-item">
-          <span class="label">Сложность</span>
-          <span class="value" id="complexityCost">₽0.00</span>
-        </div>
-        <div class="result-item total">
-          <span class="label">ИТОГО</span>
-          <span class="value" id="totalCost">₽0.00</span>
-        </div>
-      </aside>
-    </div>
+        </aside>
+      </div>
 
   </div>
 

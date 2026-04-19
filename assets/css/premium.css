@@ -96,6 +96,78 @@ body {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
+/* Calculator 3-Column Grid Layout */
+.calculator-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr 280px;
+  gap: 20px;
+  height: calc(100vh - 140px);
+}
+
+.calculator-left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.calculator-middle {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.calculator-right {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.order-info-panel {
+  background: var(--bg-primary);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.parts-list-panel {
+  flex: 1;
+  background: var(--bg-primary);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.parts-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.part-parameters {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .modal-content .button-group {
   display: flex;
   gap: 12px;
