@@ -474,25 +474,35 @@
       </aside>
     </div>
 
-    <!-- ERP Tab -->
-    <div id="erpTab" class="erp-tab" style="display: none;">
-      <div class="erp-layout">
-        <aside class="orders-sidebar">
-          <h3>📋 Очередь заказов</h3>
-          <div id="ordersList"></div>
-        </aside>
+  </div>
 
-        <aside class="stations-sidebar">
-          <h3>🖨️ Принтеры</h3>
-          <div id="printersList" class="stations-list"></div>
-
-          <h3>🔧 Постобработка</h3>
-          <div id="postProcessingList" class="stations-list"></div>
-
-          <h3>🎨 Покраска</h3>
-          <div id="paintingList" class="stations-list"></div>
-        </aside>
+  <!-- ERP Tab -->
+  <div id="erpTab" class="erp-tab" style="display: none;">
+    <header class="app-header">
+      <div class="header-left">
+        <h1>ERP Планирование</h1>
       </div>
+      <div class="header-right">
+        <span id="userInfo"></span>
+        <button onclick="handleLogout()" class="icon-btn"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </header>
+    <div class="erp-layout">
+      <aside class="orders-sidebar">
+        <h3>📋 Очередь заказов</h3>
+        <div id="ordersList"></div>
+      </aside>
+
+      <aside class="stations-sidebar">
+        <h3>🖨️ Принтеры</h3>
+        <div id="printersList" class="stations-list"></div>
+
+        <h3>🔧 Постобработка</h3>
+        <div id="postProcessingList" class="stations-list"></div>
+
+        <h3>🎨 Покраска</h3>
+        <div id="paintingList" class="stations-list"></div>
+      </aside>
     </div>
   </div>
 
